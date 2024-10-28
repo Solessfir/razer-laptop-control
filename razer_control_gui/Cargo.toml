@@ -19,6 +19,10 @@ path = "src/daemon/daemon.rs"
 name = "razer-settings"
 path = "src/razer-settings/razer-settings.rs"
 
+# [[bin]]
+# name = "gui"
+# path = "src/gui.rs"
+
 [lints.rust]
 
 [lints.clippy]
