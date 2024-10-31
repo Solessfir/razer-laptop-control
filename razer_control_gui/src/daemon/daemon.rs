@@ -16,13 +16,10 @@ mod comms;
 mod config;
 mod kbd;
 mod device;
-mod battery;
-mod dbus_mutter_displayconfig;
-mod dbus_mutter_idlemonitor;
-mod screensaver;
-mod login1;
+mod dbus_generated;
 
-use crate::kbd::Effect;
+use kbd::Effect;
+use dbus_generated::*;
 
 lazy_static! {
     static ref EFFECT_MANAGER: Mutex<kbd::EffectManager> = Mutex::new(kbd::EffectManager::new());
