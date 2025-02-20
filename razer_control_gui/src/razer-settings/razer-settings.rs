@@ -274,8 +274,7 @@ fn main() {
     setup_panic_hook();
     gtk::init().or_crash("Failed to initialize GTK.");
 
-    let device_file = std::fs::read_to_string(service::DEVICE_FILE)
-        .or_crash("Failed to read the device file");
+    let device_file = service::get_device_data();
     let devices: Vec<SupportedDevice> = serde_json::from_str(&device_file)
         .or_crash("Failed to parse the device file");
 

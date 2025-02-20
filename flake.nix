@@ -37,10 +37,6 @@
 
           src = ./razer_control_gui;
 
-          postConfigure = ''
-            substituteInPlace src/daemon/device.rs --replace '/usr/share/razercontrol/laptops.json' '${./razer_control_gui/data/devices/laptops.json}'
-          '';
-
           postBuild =
             let
               app = "razer-settings";

@@ -1,8 +1,18 @@
 //! This is duplicated stuff for now, until we have a proper project structure
 
+use std::fs;
+
 use serde::{Serialize, Deserialize};
 
-pub const DEVICE_FILE: &str = "/usr/share/razercontrol/laptops.json";
+const EMBEDDED_DEVICE_DATA: &str = include_str!("../data/devices/laptops.json");
+const DEVICE_FILE: &str = "/usr/share/razercontrol/laptops.json";
+
+pub fn get_device_data() -> String {
+    let device_data = fs::read_to_string(DEVICE_FILE)
+        .unwrap_or(EMBEDDED_DEVICE_DATA.into());
+
+    device_data
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SupportedDevice {
