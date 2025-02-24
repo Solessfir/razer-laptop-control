@@ -189,7 +189,6 @@ fn get_power(ac: bool) -> Option<(u8, u8, u8)> {
     }
 
     let response = send_data(comms::DaemonCommand::GetCPUBoost { ac })?;
-    use comms::DaemonResponse::*;
     match response {
         GetCPUBoost { cpu } => {
             result.1 = cpu;
@@ -202,7 +201,6 @@ fn get_power(ac: bool) -> Option<(u8, u8, u8)> {
     }
 
     let response = send_data(comms::DaemonCommand::GetGPUBoost { ac })?;
-    use comms::DaemonResponse::*;
     match response {
         GetGPUBoost { gpu } => {
             result.2 = gpu;
@@ -508,7 +506,7 @@ fn make_page(ac: bool, device: SupportedDevice) -> SettingsPage {
         scale.set_value(fan_speed as f64);
         scale.set_sensitive(fan_speed != 0);
         scale.set_width_request(100);
-        scale.connect_change_value(clone!(@weak switch => @default-return gtk::glib::Propagation::Stop, move |scale, stype, value| {
+        scale.connect_change_value(clone!(@weak switch => @default-return gtk::glib::Propagation::Stop, move |scale, _, value| {
             let value = value.clamp(min_fan_speed, max_fan_speed);
             set_fan_speed(ac, value as i32).or_crash("Error setting fan speed");
             let fan_speed = get_fan_speed(ac).or_crash("Error reading fan speed");
@@ -535,7 +533,7 @@ fn make_page(ac: bool, device: SupportedDevice) -> SettingsPage {
         let scale = Scale::with_range(gtk::Orientation::Horizontal, 0f64, 100f64, 1f64);
         scale.set_value(brightness as f64);
         scale.set_width_request(100);
-        scale.connect_change_value(move |scale, stype, value| {
+        scale.connect_change_value(move |scale, _, value| {
             let value = value.clamp(0f64, 100f64);
             set_brightness(ac, value as u8).or_crash("Error setting brigthness");
             let brightness = get_brightness(ac).or_crash("Error reading brightness");
@@ -651,7 +649,7 @@ fn make_general_page() -> SettingsPage {
             let scale = Scale::with_range(gtk::Orientation::Horizontal, 65f64, 80f64, 1f64);
             scale.set_value(bho.1 as f64);
             scale.set_width_request(100);
-            scale.connect_change_value(clone!(@weak switch => @default-return gtk::glib::Propagation::Stop, move |scale, stype, value| {
+            scale.connect_change_value(clone!(@weak switch => @default-return gtk::glib::Propagation::Stop, move |scale, _, value| {
                 let is_on = switch.is_active();
                 let threshold = value.clamp(50f64, 80f64) as u8;
 
