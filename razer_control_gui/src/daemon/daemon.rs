@@ -1,11 +1,10 @@
 use std::io::{Read, Write};
 use std::os::unix::net::UnixStream;
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 use std::thread::{self, JoinHandle};
 use std::time;
 
 use log::*;
-use lazy_static::lazy_static;
 use signal_hook::iterator::Signals;
 use signal_hook::consts::{SIGINT, SIGTERM};
 use dbus::blocking::Connection;
@@ -18,23 +17,22 @@ mod kbd;
 mod device;
 mod dbus_generated;
 
-use kbd::Effect;
+use kbd::{Effect, EffectManager};
+use device::DeviceManager;
 use dbus_generated::*;
 
-lazy_static! {
-    static ref EFFECT_MANAGER: Mutex<kbd::EffectManager> = Mutex::new(kbd::EffectManager::new());
-    // static ref CONFIG: Mutex<config::Configuration> = {
-        // match config::Configuration::read_from_config() {
-            // Ok(c) => Mutex::new(c),
-            // Err(_) => Mutex::new(config::Configuration::new()),
-        // }
-    // };
-    static ref DEV_MANAGER: Mutex<device::DeviceManager> = {
-        match device::DeviceManager::read_laptops_file() {
-            Ok(c) => Mutex::new(c),
-            Err(_) => Mutex::new(device::DeviceManager::new()),
-        }
-    };
+static EFFECT_MANAGER: LazyLock<Mutex<EffectManager>> = LazyLock::new(init_effect_manager);
+static DEV_MANAGER: LazyLock<Mutex<DeviceManager>> = LazyLock::new(init_dev_manager);
+
+fn init_effect_manager() -> Mutex<EffectManager> {
+    Mutex::new(EffectManager::new())
+}
+
+fn init_dev_manager() -> Mutex<DeviceManager> {
+    match DeviceManager::read_laptops_file() {
+        Ok(c) => Mutex::new(c),
+        Err(_) => Mutex::new(device::DeviceManager::new()),
+    }
 }
 
 // Main function for daemon
