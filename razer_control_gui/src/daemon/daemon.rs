@@ -335,7 +335,7 @@ pub fn process_client_request(cmd: comms::DaemonCommand) -> Option<comms::Daemon
         comms::DaemonCommand::GetCPUBoost{ac} => Some(comms::DaemonResponse::GetCPUBoost { cpu: d.get_cpu_boost(ac) }),
         comms::DaemonCommand::GetGPUBoost{ac} => Some(comms::DaemonResponse::GetGPUBoost { gpu: d.get_gpu_boost(ac) }),
         comms::DaemonCommand::SetEffect{ name, params } => {
-            let mut res = false;
+            let mut res;
             {
                 let mut k = effect_manager();
                 res = true;
@@ -366,7 +366,7 @@ pub fn process_client_request(cmd: comms::DaemonCommand) -> Option<comms::Daemon
 
         comms::DaemonCommand::SetStandardEffect{ name, params } => {
             // TODO save standart effect may be struct ?
-            let mut res = false;
+            let res;
             if let Some(laptop) = d.get_device() {
                 {
                     let mut k = effect_manager();
