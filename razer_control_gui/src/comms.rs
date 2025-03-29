@@ -26,6 +26,8 @@ pub enum DaemonCommand {
     GetSync (),
     SetBatteryHealthOptimizer { is_on: bool, threshold: u8 },
     GetBatteryHealthOptimizer (),
+    SetEnableLightControl { enable: bool },
+    GetEnableLightControl,
     GetDeviceName 
 }
 
@@ -51,6 +53,8 @@ pub enum DaemonResponse {
     GetSync { sync: bool },
     SetBatteryHealthOptimizer { result: bool },
     GetBatteryHealthOptimizer { is_on: bool, threshold: u8 },
+    SetEnableLightControl { result: bool },
+    GetEnableLightControl { enabled: bool },
     GetDeviceName { name: String }
 }
 

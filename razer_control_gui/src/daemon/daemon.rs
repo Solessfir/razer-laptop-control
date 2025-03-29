@@ -134,9 +134,14 @@ pub fn start_keyboard_animator_task() -> JoinHandle<()> {
     // Start the keyboard animator thread,
     thread::spawn(|| {
         loop {
-            if let Some(laptop) = dev_manager().get_device() {
-                effect_manager().update(laptop);
+            let light_control_enabled = dev_manager().get_light_control();
+
+            if light_control_enabled {
+                if let Some(laptop) = dev_manager().get_device() {
+                    effect_manager().update(laptop);
+                }
             }
+
             thread::sleep(std::time::Duration::from_millis(kbd::ANIMATION_SLEEP_MS));
         }
     })
@@ -405,6 +410,13 @@ pub fn process_client_request(cmd: comms::DaemonCommand) -> Option<comms::Daemon
                 None => "Unknown Device".into()
             };
             return Some(comms::DaemonResponse::GetDeviceName { name });
+        }
+
+        comms::DaemonCommand::SetEnableLightControl { enable } => {
+            Some(comms::DaemonResponse::SetEnableLightControl { result: d.set_light_control(enable) })
+        }
+        comms::DaemonCommand::GetEnableLightControl => {
+            Some(comms::DaemonResponse::GetEnableLightControl { enabled: d.get_light_control()})
         }
 
     };

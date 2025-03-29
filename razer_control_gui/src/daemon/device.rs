@@ -150,6 +150,27 @@ impl DeviceManager {
         return false;
     }
 
+    pub fn set_light_control(&mut self, enabled: bool) -> bool {
+        if let Some(config) = self.get_config() {
+            if config.enable_light_control != enabled {
+                config.enable_light_control = enabled;
+                if let Err(e) = config.write_to_file() {
+                    eprintln!("Error write config {:?}", e);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    pub fn get_light_control(&mut self) -> bool {
+        if let Some(config) = self.get_config() {
+            return config.enable_light_control;
+        }
+
+        return false;
+    }
+
     fn remove_watch(&mut self, proxy_idle: &dyn dbus_mutter_idlemonitor::OrgGnomeMutterIdleMonitor) {
         if let Ok(_) = proxy_idle.remove_watch(self.idle_id) {
             println!("remove idle handler");

@@ -32,8 +32,13 @@ impl PowerConfig {
     }
 }
 
+fn default_light_control() -> bool { true }
+
 #[derive(Serialize, Deserialize)]
 pub struct Configuration {
+    /// Alows using razer-laptop-control without control over the keyboard light
+    #[serde(default = "default_light_control")]
+    pub enable_light_control: bool,
     pub power: [PowerConfig; 2],
     /// Sync light settings between ac and battery
     pub sync: bool, 
@@ -46,6 +51,7 @@ pub struct Configuration {
 impl Configuration {
     pub fn new() -> Configuration {
         return Configuration {
+            enable_light_control: true,
             power: [PowerConfig::new(), PowerConfig::new()],
             sync: false,
             no_light: 0.0,

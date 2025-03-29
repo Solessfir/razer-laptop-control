@@ -59,6 +59,8 @@ enum ReadAttr {
     Sync,
     /// Read the current bho mode
     Bho,
+    /// Read if light control is enabled
+    LightControl,
 }
 
 #[derive(Subcommand)]
@@ -75,6 +77,8 @@ enum WriteAttr {
     Sync(SyncParams),
     /// Set battery health optimization
     Bho(BhoParams),
+    /// Enable or disable light control
+    LightControl(LightControlParams),
 }
 
 #[derive(Parser)]
@@ -123,6 +127,11 @@ struct BhoParams {
     state: OnOff,
     /// charging threshold
     threshold: Option<u8>,
+}
+
+#[derive(Parser)]
+struct LightControlParams {
+    enable: OnOff,
 }
 
 #[derive(ValueEnum, Clone)]
@@ -284,6 +293,7 @@ fn main() {
             ReadAttr::Logo(AcStateParam { ac_state }) => read_logo_mode(ac_state as usize),
             ReadAttr::Sync => read_sync(),
             ReadAttr::Bho => read_bho(),
+            ReadAttr::LightControl => read_light_control(),
         },
         Args::Write { attr } => match attr {
             WriteAttr::Fan(FanParams { ac_state, speed }) => {
@@ -306,6 +316,9 @@ fn main() {
             }) => write_logo_mode(ac_state as usize, logo_state as u8),
             WriteAttr::Bho(BhoParams { state, threshold }) => {
                 validate_and_write_bho(threshold, state)
+            },
+            WriteAttr::LightControl(LightControlParams { enable }) => {
+                write_light_control(enable.is_on())
             }
         },
         Args::Effect { effect } => match effect {
@@ -410,6 +423,13 @@ fn validate_and_write_bho(threshold: Option<u8>, state: OnOff) {
     }
 }
 
+fn write_light_control(enable: bool) {
+    match send_data(comms::DaemonCommand::SetEnableLightControl { enable }) {
+        Some(_) => read_light_control(),
+        None => eprintln!("Unknown error!"),
+    }
+}
+
 fn read_bho() {
     send_data(comms::DaemonCommand::GetBatteryHealthOptimizer()).map_or_else(
         || eprintln!("Unknown error occured when getting bho"),
@@ -425,6 +445,20 @@ fn read_bho() {
                     false => {
                         eprintln!("Battery health optimization is off");
                     }
+                }
+            }
+        },
+    );
+}
+
+fn read_light_control() {
+    send_data(comms::DaemonCommand::GetEnableLightControl).map_or_else(
+        || eprintln!("Unknown error occured when reading light control"),
+        |result| {
+            if let comms::DaemonResponse::GetEnableLightControl { enabled } = result {
+                match enabled {
+                    true => println!("Light Control is enabled"),
+                    false => println!("Light Control is disabled")
                 }
             }
         },
