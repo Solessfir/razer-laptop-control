@@ -35,8 +35,10 @@ impl PowerConfig {
 #[derive(Serialize, Deserialize)]
 pub struct Configuration {
     pub power: [PowerConfig; 2],
-    pub sync: bool, // sync light settings between ac and battery
-    pub no_light: f64, // no light bellow this percentage of battery
+    /// Sync light settings between ac and battery
+    pub sync: bool, 
+    // No light bellow this percentage of battery
+    pub no_light: f64,
     pub standard_effect: u8,
     pub standard_effect_params: Vec<u8>,
 }
