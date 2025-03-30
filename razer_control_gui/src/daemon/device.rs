@@ -238,6 +238,8 @@ impl DeviceManager {
     }
 
     pub fn restore_standard_effect(&mut self) {
+        if !self.get_light_control() { return; }
+
         let mut effect = 0;
         let mut params: Vec<u8> = vec![];
         if let Some(config) = self.get_config() {
