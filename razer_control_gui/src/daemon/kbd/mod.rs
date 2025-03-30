@@ -129,9 +129,6 @@ pub struct EffectManager {
     render_board: board::KeyboardData,
 }
 
-unsafe impl Send for EffectManager {}
-unsafe impl Sync for EffectManager {}
-
 impl EffectManager {
     pub fn new() -> EffectManager {
         EffectManager {
