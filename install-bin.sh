@@ -2,7 +2,7 @@
 
 # GitHub repository details
 REPO_OWNER="Solessfir"
-REPO_NAME="razer-laptop-control-no-dkms"
+REPO_NAME="razer-laptop-control"
 LATEST_RELEASE_URL="https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest"
 
 # Installation directories

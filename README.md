@@ -17,11 +17,11 @@ An application designed for Razer laptops (excluding 2025 models)
 
 ### Binary Install
 ```sh
-curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control-no-dkms/main/install-bin.sh | bash -s install
+curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s install
 ```
 Using wget:
 ```sh
-wget -qO- https://raw.githubusercontent.com/Solessfir/razer-laptop-control-no-dkms/main/install-bin.sh | bash -s install
+wget -qO- https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s install
 ```
 
 ## Building from Source
@@ -51,11 +51,11 @@ services.razer-laptop-control.enable = true;
 
 ## Uninstall
 ```sh
-curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control-no-dkms/main/install-bin.sh | bash -s uninstall
+curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s uninstall
 ```
 Using wget:
 ```sh
-wget -qO- https://raw.githubusercontent.com/Solessfir/razer-laptop-control-no-dkms/main/install-bin.sh | bash -s uninstall
+wget -qO- https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s uninstall
 ```
 
 ## CLI Usage
