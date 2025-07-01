@@ -251,5 +251,19 @@
         "pid": "02a0",
         "features": ["logo", "boost", "bho"],
         "fan": [2200, 5000]
-    }     
+    },
+    {
+       "name": "Razer Blade 16 2024",
+       "vid": "1532",
+       "pid": "02b7",
+       "features": ["logo", "boost", "bho"],
+       "fan": [2200, 5000]
+    },
+    {
+        "name": "Razer Blade 18 2024",
+        "vid": "1532",
+        "pid": "02b8",
+        "features": ["logo", "boost", "bho"],
+        "fan": [2200, 5000]
+    }  
 ]
