@@ -1,16 +1,117 @@
-# Razer laptop control project
-An application designed for Razer notebooks
+# Razer Laptop Control
+An application designed for Razer laptops (excluding 2025 models)
 
-## Join the unofficial Razer linux Channel
-I can be contacted on this discord server under the 'laptop-control' channel
-[Discord link](https://discord.gg/GdHKf45)
+![](razer_control_gui/Screenshoot.png)
 
-## Install
-[Install](razer_control_gui/README.md)
+## Features
+- Full background daemon: Auto-loads last configuration on system startup
+- CLI and GUI for adjusting settings
+- RGB keyboard control
+- Fan speed control
+- Power mode management
+- Battery optimization
+- Logo state control (for models with logo)
+- Light effect synchronization between AC/Battery modes
 
-## What does this control
-On all razer notebooks, the following is supported:
-* RGB keyboard control (Experimental)
-* Fan control
-* Power control
-* Battery optimizer
+## Installation
+
+### Binary Install
+> [!WARNING]
+> Tested on Arch only.
+```sh
+curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s install
+```
+Using wget:
+```sh
+wget -qO- https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s install
+```
+
+## Building from Source
+Dependencies:
+```
+libdbus-1-dev libusb-dev libhidapi-dev libhidapi-hidraw0 pkg-config libudev-dev libgtk-3-dev
+```
+Steps:
+1. Install Rust (cargo/rustc)
+2. Install required dependencies
+3. Run installer as normal user: `./install.sh install`
+4. Reboot
+
+## NixOS Flake Installation
+1. Add to your flake inputs:
+```sh
+inputs.razerdaemon.url = "github:JosuGZ/razer-laptop-control";
+```
+2. Import module:
+```sh
+imports = [ inputs.razerdaemon.nixosModules.default ];
+```
+3. Enable service:
+```sh
+services.razer-laptop-control.enable = true;
+```
+
+## Uninstall
+```sh
+curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s uninstall
+```
+Using wget:
+```sh
+wget -qO- https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s uninstall
+```
+
+## CLI Usage
+```
+razer-cli <action> <attribute> <power_state> <args>
+```
+
+## Basic Examples
+Set Balanced Power Mode:
+```sh
+razer-cli write power ac 0 1 0
+```
+Set Gaming Power Mode:
+```sh
+razer-cli write power ac 1 1 0
+```
+Set Static Red Keyboard:
+```sh
+razer-cli effect static 255 0 0
+```
+Available effects:
+* `off` - No lighting
+* `wave` - Direction parameter
+* `reactive` - Speed, R, G, B
+* `breathing` - Type, [RGB1], [RGB2]
+* `spectrum` - Color cycle
+* `static` - R, G, B
+* `starlight` - Type, [RGB1], [RGB2]
+
+## Advanced Usage
+Power Control:
+
+Custom power mode with CPU/GPU boost levels:
+```sh
+razer-cli write power ac 4 <cpu_boost> <gpu_boost>
+```
+Boost levels:
+* 0 = Low
+* 1 = Normal
+* 2 = High
+* 3 = Boost (CPU only on 2020+/Studio models)
+
+## Command Structure
+Actions:
+* `read` - Check current state
+* `write` - Change and save configuration
+
+Attributes:
+* `fan` - RPM (0=Auto, other=manual RPM)
+* `power` - Mode (0=Balanced, 1=Gaming, 2=Creator, 4=Custom)
+* `brightness` - Keyboard brightness (0-255)
+* `logo` - Logo state (0=Off, 1=On, 2=Breathing)
+* `sync` - Light sync between AC/battery
+* `standard_effect` - Predefined keyboard effects
+* `colour` - RGB values (0-255 per channel)
+
+## [Join the Unofficial Razer Linux Channel](https://discord.gg/GdHKf45)
