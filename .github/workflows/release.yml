@@ -1,0 +1,58 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: libdbus-1-dev libusb-dev libhidapi-dev libhidapi-hidraw0 pkg-config libudev-dev libgtk-3-dev
+          version: 1.0
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build release binaries
+        working-directory: ./razer_control_gui
+        run: cargo build --release
+
+      - name: Prepare release assets
+        working-directory: ./razer_control_gui
+        run: |
+          RELEASE_DIR="rlc-${{ github.ref_name }}-x86_64"
+          mkdir -p "$RELEASE_DIR"
+          
+          cp target/release/razer-cli "$RELEASE_DIR/"
+          cp target/release/razer-settings "$RELEASE_DIR/"
+          cp target/release/daemon "$RELEASE_DIR/"
+          cp data/devices/laptops.json "$RELEASE_DIR/"
+          cp data/udev/99-hidraw-permissions.rules "$RELEASE_DIR/"
+          cp data/gui/razer-settings.desktop "$RELEASE_DIR/"
+          
+          # Create checksum file
+          cd "$RELEASE_DIR"
+          sha256sum * > sha256sums.txt
+          cd ..
+          
+          tar caf "$RELEASE_DIR.tar.xz" "$RELEASE_DIR"
+
+      - name: Create release and upload assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            razer_control_gui/rlc-${{ github.ref_name }}-x86_64.tar.xz
+            razer_control_gui/rlc-${{ github.ref_name }}-x86_64/sha256sums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
