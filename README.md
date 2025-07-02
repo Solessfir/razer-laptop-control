@@ -17,7 +17,9 @@ An application designed for Razer laptops (excluding 2025 models)
 
 ### Binary Install
 > [!WARNING]
-> Tested on Arch only.
+> Tested on Arch Linux only
+
+Using curl:
 ```sh
 curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s install
 ```
@@ -34,7 +36,7 @@ libdbus-1-dev libusb-dev libhidapi-dev libhidapi-hidraw0 pkg-config libudev-dev 
 Steps:
 1. Install Rust (cargo/rustc)
 2. Install required dependencies
-3. Run installer as normal user: `./install.sh install`
+3. Run installer as normal user: `./razer_control_gui/install.sh install`
 4. Reboot
 
 ## NixOS Flake Installation
@@ -52,6 +54,10 @@ services.razer-laptop-control.enable = true;
 ```
 
 ## Uninstall
+> [!WARNING]
+> Tested on Arch Linux only
+
+Using curl:
 ```sh
 curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s uninstall
 ```
