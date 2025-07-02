@@ -350,13 +350,13 @@ main() {
             verify_installation
             echo "Installation complete" >&2
             echo "Note: You may need to log out and back in for the service to start" >&2
-            echo "You can verify the daemon is running with: pgrep -af daemon" >&2
+            echo "You can verify the daemon is running with: pgrep -af daemon | grep razer" >&2
             ;;
         uninstall)
             uninstall
             ;;
         *)
-            echo "Usage: $0 {install|uninstall}" >&2
+            echo "Usage: $0 <install/uninstall>" >&2
             exit 1
             ;;
     esac
