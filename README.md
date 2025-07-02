@@ -20,17 +20,17 @@ An application designed for Razer laptops (excluding 2025 models)
 > Tested on Arch Linux only
 
 Using curl:
-```sh
+```nix
 curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s install
 ```
 Using wget:
-```sh
+```nix
 wget -qO- https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s install
 ```
 
 ## Building from Source
 Dependencies:
-```
+```sh
 libdbus-1-dev libusb-dev libhidapi-dev libhidapi-hidraw0 pkg-config libudev-dev libgtk-3-dev
 ```
 Steps:
@@ -58,30 +58,30 @@ services.razer-laptop-control.enable = true;
 > Tested on Arch Linux only
 
 Using curl:
-```sh
+```nix
 curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s uninstall
 ```
 Using wget:
-```sh
+```nix
 wget -qO- https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s uninstall
 ```
 
 ## CLI Usage
-```
+```nix
 razer-cli <action> <attribute> <power_state> <args>
 ```
 
 ## Basic Examples
 Set Balanced Power Mode:
-```sh
+```nix
 razer-cli write power ac 0 1 0
 ```
 Set Gaming Power Mode:
-```sh
+```nix
 razer-cli write power ac 1 1 0
 ```
 Set Static Red Keyboard:
-```sh
+```nix
 razer-cli effect static 255 0 0
 ```
 Available effects:
@@ -97,7 +97,7 @@ Available effects:
 Power Control:
 
 Custom power mode with CPU/GPU boost levels:
-```sh
+```nix
 razer-cli write power ac 4 <cpu_boost> <gpu_boost>
 ```
 Boost levels:
