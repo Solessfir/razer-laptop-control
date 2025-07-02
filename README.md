@@ -41,15 +41,15 @@ Steps:
 
 ## NixOS Flake Installation
 1. Add to your flake inputs:
-```sh
+```nix
 inputs.razerdaemon.url = "github:JosuGZ/razer-laptop-control";
 ```
 2. Import module:
-```sh
+```nix
 imports = [ inputs.razerdaemon.nixosModules.default ];
 ```
 3. Enable service:
-```sh
+```nix
 services.razer-laptop-control.enable = true;
 ```
 
