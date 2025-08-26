@@ -6,6 +6,7 @@ mod comms;
 mod args;
 
 use args::*;
+use service::usb::razer_devices;
 
 fn main() {
     if std::fs::metadata(comms::SOCKET_PATH).is_err() {
@@ -123,6 +124,24 @@ fn main() {
                 send_standard_effect("wave".to_string(), vec![params.direction])
             }
         },
+        Args::DeviceInfo => {
+            println!("Found the following devices:");
+            match razer_devices() {
+                Ok(devices) => {
+                    for device in devices{
+                        println!(
+                            "- {}:{} {}",
+                            device.vendor_id,
+                            device.product_id,
+                            device.name
+                        );
+                    }
+                }
+                Err(error) => {
+                    println!("Failed to get device info: {error}");
+                }
+            }
+        }
     }
 }
 

@@ -29,6 +29,8 @@ pub enum Args {
         #[command(subcommand)]
         effect: Effect,
     },
+    /// Displays information about present Razer Devices
+    DeviceInfo
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
