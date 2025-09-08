@@ -4,6 +4,8 @@ use std::fs;
 
 use serde::{Serialize, Deserialize};
 
+pub mod usb;
+
 const EMBEDDED_DEVICE_DATA: &str = include_str!("../data/devices/laptops.json");
 const DEVICE_FILE: &str = "/usr/share/razercontrol/laptops.json";
 

@@ -1,281 +1,12 @@
+use clap::error::ErrorKind;
+use clap::{CommandFactory, Parser};
+
 #[path = "../comms.rs"]
 mod comms;
-use clap::{error::ErrorKind, CommandFactory, Parser, Subcommand, ValueEnum};
+mod args;
 
-#[derive(Parser)]
-#[command(version="0.5.0", about="razer laptop configuration for linux", name="razer-cli")]
-struct Cli {
-    #[command(subcommand)]
-    args: Args,
-}
-
-#[derive(Subcommand)]
-enum Args {
-    /// Read the current configuration of the device for some attribute
-    Read {
-        #[command(subcommand)]
-        attr: ReadAttr,
-    },
-    /// Write a new configuration to the device for some attribute
-    Write {
-        #[command(subcommand)]
-        attr: WriteAttr,
-    },
-    /// Write a standard effect
-    StandardEffect {
-        #[command(subcommand)]
-        effect: StandardEffect,
-    },
-    /// Write a custom effect
-    Effect {
-        #[command(subcommand)]
-        effect: Effect,
-    },
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-enum OnOff {
-    On,
-    Off,
-}
-
-impl OnOff {
-    pub fn is_on(&self) -> bool {
-        matches!(self, Self::On)
-    }
-}
-
-#[derive(Subcommand)]
-enum ReadAttr {
-    /// Read the current fan speed
-    Fan(AcStateParam),
-    /// Read the current power mode
-    Power(AcStateParam),
-    /// Read the current brightness
-    Brightness(AcStateParam),
-    /// Read the current logo mode
-    Logo(AcStateParam),
-    /// Read the current sync mode
-    Sync,
-    /// Read the current bho mode
-    Bho,
-    /// Read if light control is enabled
-    LightControl,
-}
-
-#[derive(Subcommand)]
-enum WriteAttr {
-    /// Set the fan speed
-    Fan(FanParams),
-    /// Set the power mode
-    Power(PowerParams),
-    /// Set the brightness of the keyboard
-    Brightness(BrightnessParams),
-    /// Set the logo mode
-    Logo(LogoParams),
-    /// Set sync
-    Sync(SyncParams),
-    /// Set battery health optimization
-    Bho(BhoParams),
-    /// Enable or disable light control
-    LightControl(LightControlParams),
-}
-
-#[derive(Parser)]
-struct PowerParams {
-    /// battery/plugged in
-    ac_state: AcState,
-    /// power mode (0, 1, 2, 3 or 4)
-    pwr: u8,
-    /// cpu boost (0, 1, 2 or 3)
-    cpu_mode: Option<u8>,
-    /// gpu boost (0, 1 or 2)
-    gpu_mode: Option<u8>,
-}
-
-#[derive(Parser)]
-struct FanParams {
-    /// battery/plugged in
-    ac_state: AcState,
-    /// fan speed in RPM
-    speed: i32,
-}
-
-#[derive(Parser)]
-struct BrightnessParams {
-    /// battery/plugged in
-    ac_state: AcState,
-    /// brightness
-    brightness: i32,
-}
-
-#[derive(Parser)]
-struct LogoParams {
-    /// battery/plugged in
-    ac_state: AcState,
-    /// logo mode (0, 1 or 2)
-    logo_state: i32,
-}
-
-#[derive(Parser)]
-struct SyncParams {
-    sync_state: OnOff,
-}
-
-#[derive(Parser)]
-struct BhoParams {
-    state: OnOff,
-    /// charging threshold
-    threshold: Option<u8>,
-}
-
-#[derive(Parser)]
-struct LightControlParams {
-    enable: OnOff,
-}
-
-#[derive(ValueEnum, Clone)]
-enum AcState {
-    /// battery
-    Bat,
-    /// plugged in
-    Ac,
-}
-
-#[derive(Parser, Clone)]
-struct AcStateParam {
-    /// battery/plugged in
-    ac_state: AcState,
-}
-
-#[derive(Subcommand)]
-enum StandardEffect {
-    Off,
-    Wave(WaveParams),
-    Reactive(ReactiveParams),
-    Breathing(BreathingParams),
-    Spectrum,
-    Static(StaticParams),
-    Starlight(StarlightParams),
-}
-
-#[derive(Parser)]
-struct WaveParams {
-    /// direction (0 or 1)
-    direction: u8,
-}
-
-#[derive(Parser)]
-struct ReactiveParams {
-    /// speed (0-255)
-    speed: u8,
-    /// red (0-255)
-    red: u8,
-    /// green (0-255)
-    green: u8,
-    /// blue (0-255)
-    blue: u8,
-}
-
-#[derive(Parser)]
-struct BreathingParams {
-    /// kind (0-2)
-    kind: u8,
-    /// red1 (0-255)
-    red1: u8,
-    /// green1 (0-255)
-    green1: u8,
-    /// blue1 (0-255)
-    blue1: u8,
-    /// red2 (0-255)
-    red2: u8,
-    /// green2 (0-255)
-    green2: u8,
-    /// blue2 (0-255)
-    blue2: u8,
-}
-
-#[derive(Parser)]
-struct StarlightParams {
-    /// kind (0-2)
-    kind: u8,
-    /// speed (0-255)
-    speed: u8,
-    /// red1 (0-255)
-    red1: u8,
-    /// green1 (0-255)
-    green1: u8,
-    /// blue1 (0-255)
-    blue1: u8,
-    /// red2 (0-255)
-    red2: u8,
-    /// green2 (0-255)
-    green2: u8,
-    /// blue2 (0-255)
-    blue2: u8,
-}
-
-#[derive(Subcommand)]
-enum Effect {
-    Static(StaticParams),
-    StaticGradient(StaticGradientParams),
-    WaveGradient(WaveGradientParams),
-    BreathingSingle(BreathingSingleParams),
-}
-
-#[derive(Parser)]
-struct StaticParams {
-    /// red (0-255)
-    red: u8,
-    /// green (0-255)
-    green: u8,
-    /// blue (0-255)
-    blue: u8,
-}
-
-#[derive(Parser)]
-struct StaticGradientParams {
-    /// red1 (0-255)
-    red1: u8,
-    /// green1 (0-255)
-    green1: u8,
-    /// blue1 (0-255)
-    blue1: u8,
-    /// red2 (0-255)
-    red2: u8,
-    /// green2 (0-255)
-    green2: u8,
-    /// blue2 (0-255)
-    blue2: u8,
-}
-
-#[derive(Parser)]
-struct WaveGradientParams {
-    /// red1 (0-255)
-    red1: u8,
-    /// green1 (0-255)
-    green1: u8,
-    /// blue1 (0-255)
-    blue1: u8,
-    /// red2 (0-255)
-    red2: u8,
-    /// green2 (0-255)
-    green2: u8,
-    /// blue2 (0-255)
-    blue2: u8,
-}
-
-#[derive(Parser)]
-struct BreathingSingleParams {
-    /// red (0-255)
-    red: u8,
-    /// green (0-255)
-    green: u8,
-    /// blue (0-255)
-    blue: u8,
-    /// duration (0-255)
-    duration: u8,
-}
+use args::*;
+use service::usb::razer_devices;
 
 fn main() {
     if std::fs::metadata(comms::SOCKET_PATH).is_err() {
@@ -393,6 +124,24 @@ fn main() {
                 send_standard_effect("wave".to_string(), vec![params.direction])
             }
         },
+        Args::DeviceInfo => {
+            println!("Found the following devices:");
+            match razer_devices() {
+                Ok(devices) => {
+                    for device in devices{
+                        println!(
+                            "- {}:{} {}",
+                            device.vendor_id,
+                            device.product_id,
+                            device.name
+                        );
+                    }
+                }
+                Err(error) => {
+                    println!("Failed to get device info: {error}");
+                }
+            }
+        }
     }
 }
 

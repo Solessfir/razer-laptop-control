@@ -1,23 +1,14 @@
 // mod kbd;
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
+use service::usb::RAZER_VENDOR_ID;
+use service::SupportedDevice;
 use std::{thread, time, io};
 use hidapi::HidApi;
 use crate::dbus_mutter_idlemonitor;
 use crate::config;
 use crate::battery;
 use dbus::blocking::Connection;
-
-const RAZER_VENDOR_ID: u16 = 0x1532;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct SupportedDevice {
-    pub name: String,
-    pub vid: String,
-    pub pid: String,
-    pub features: Vec<String>,
-    pub fan: Vec<u16>,
-}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RazerPacket {
