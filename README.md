@@ -1,5 +1,5 @@
 # Razer Laptop Control
-An application designed for Razer laptops (excluding 2025 models)
+An application designed for Razer laptops
 
 ![](razer_control_gui/Screenshoot.png)
 
