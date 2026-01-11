@@ -265,5 +265,26 @@
         "pid": "02b8",
         "features": ["logo", "boost", "bho"],
         "fan": [2200, 4500]
-    }  
+    },
+    {
+        "name": "Razer Blade 14 2025",
+        "vid": "1532",
+        "pid": "02c5",
+        "features": ["logo", "boost", "bho"],
+        "fan": [2200, 4500]
+    },
+    {
+        "name": "Razer Blade 16 2025",
+        "vid": "1532",
+        "pid": "02c6",
+        "features": ["logo", "boost", "bho"],
+        "fan": [2200, 4500]
+    },
+    {
+        "name": "Razer Blade 18 2025",
+        "vid": "1532",
+        "pid": "02c7",
+        "features": ["logo", "boost", "bho"],
+        "fan": [2200, 4500]
+    }
 ]
