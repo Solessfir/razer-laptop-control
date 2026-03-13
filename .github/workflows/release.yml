@@ -44,7 +44,7 @@ jobs:
           
           # Create checksum file
           cd "$RELEASE_DIR"
-          sha256sum * > sha256sums.txt
+          find . -maxdepth 2 -type f | sort | xargs sha256sum > sha256sums.txt
           cd ..
           
           tar caf "$RELEASE_DIR.tar.xz" "$RELEASE_DIR"
