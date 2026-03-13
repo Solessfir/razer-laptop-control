@@ -76,6 +76,7 @@ impl SettingsRow {
         }
     }
 
+    #[allow(dead_code)]
     pub fn add_section(&self, title: Option<&str>) -> SettingsSection {
         let section = SettingsSection::new(title);
         // self.master_container.pack_start(&section.master_container, false, false, 0); TODO: It should be this

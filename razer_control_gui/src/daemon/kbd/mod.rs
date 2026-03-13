@@ -35,11 +35,14 @@ pub trait Effect: Send + Sync {
     /// Called 30 times per second by the Effect Manager
     fn update(&mut self) -> board::KeyboardData;
     /// Returns the arguments used to spawn the effect
+    #[allow(dead_code)]
     fn get_varargs(&mut self) -> &[u8];
     /// Returns the name of the effect (Unique identifier)
+    #[allow(dead_code)]
     fn get_name() -> &'static str
     where
         Self: Sized;
+    #[allow(dead_code)]
     fn clone_box(&self) -> Box<dyn Effect>;
     fn save(&mut self) -> EffectSave;
     fn get_state(&mut self) -> Vec<u8>;

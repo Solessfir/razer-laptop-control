@@ -264,7 +264,9 @@
         "vid": "1532",
         "pid": "02b8",
         "features": ["logo", "boost", "bho"],
-        "fan": [2200, 4500]
+        "fan": [2200, 4500],
+        "interface": 3,
+        "kbd_interface": 0
     },
     {
         "name": "Razer Blade 14 2025",

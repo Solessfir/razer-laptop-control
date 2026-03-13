@@ -23,6 +23,10 @@ pub struct SupportedDevice {
     pub pid: String,
     pub features: Vec<String>,
     pub fan: Vec<u16>,
+    #[serde(default)]
+    pub interface: Option<i32>,
+    #[serde(default)]
+    pub kbd_interface: Option<i32>,
 }
 
 impl SupportedDevice {
