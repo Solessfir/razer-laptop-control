@@ -36,8 +36,11 @@ libdbus-1-dev libusb-dev libhidapi-dev libhidapi-hidraw0 pkg-config libudev-dev 
 Steps:
 1. Install Rust (cargo/rustc)
 2. Install required dependencies
-3. Run installer as normal user: `./razer_control_gui/install.sh install`
+3. Run installer as normal user: `./install-bin.sh install_local`
 4. Reboot
+
+> [!NOTE]
+> Running `install` or `install_local` again will reinstall over an existing installation.
 
 ## NixOS Flake Installation
 1. Add to your flake inputs:

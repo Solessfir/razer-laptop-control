@@ -80,3 +80,6 @@ Mkfile.old
 
 # Nix files
 result
+
+# Editor settings
+.vscode/
