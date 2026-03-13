@@ -24,6 +24,43 @@ detect_init_system() {
     fi
 }
 
+# Build from local source and stage files into a temp directory
+prepare_local_build() {
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    BUILD_DIR="$SCRIPT_DIR/razer_control_gui"
+
+    if [ ! -f "$BUILD_DIR/Cargo.toml" ]; then
+        echo "Error: Could not find razer_control_gui/Cargo.toml relative to install-bin.sh" >&2
+        exit 1
+    fi
+
+    if ! command -v cargo &>/dev/null; then
+        echo "Error: cargo not found. Install Rust from https://rustup.rs" >&2
+        exit 1
+    fi
+
+    echo "Building from source in $BUILD_DIR..." >&2
+    cargo build --release --manifest-path "$BUILD_DIR/Cargo.toml" >&2 || {
+        echo "Error: cargo build failed" >&2
+        exit 1
+    }
+
+    STAGE_DIR=$(mktemp -d)
+    mkdir -p "$STAGE_DIR/services/systemd" "$STAGE_DIR/services/openrc"
+
+    cp "$BUILD_DIR/target/release/daemon"          "$STAGE_DIR/daemon"
+    cp "$BUILD_DIR/target/release/razer-cli"       "$STAGE_DIR/razer-cli"
+    cp "$BUILD_DIR/target/release/razer-settings"  "$STAGE_DIR/razer-settings"
+    cp "$BUILD_DIR/data/devices/laptops.json"                      "$STAGE_DIR/laptops.json"
+    cp "$BUILD_DIR/data/udev/99-hidraw-permissions.rules"          "$STAGE_DIR/99-hidraw-permissions.rules"
+    cp "$BUILD_DIR/data/gui/razer-settings.desktop"                "$STAGE_DIR/razer-settings.desktop"
+    cp "$BUILD_DIR/data/services/systemd/razercontrol.service"     "$STAGE_DIR/services/systemd/razercontrol.service"
+    cp "$BUILD_DIR/data/services/openrc/razercontrol"              "$STAGE_DIR/services/openrc/razercontrol"
+
+    echo "Staged build artifacts to $STAGE_DIR" >&2
+    echo "$STAGE_DIR"
+}
+
 # Download latest release
 download_latest_release() {
     echo "Finding latest release..." >&2
@@ -68,6 +105,8 @@ stop_service() {
             sudo rc-service razercontrol stop 2>/dev/null || true
             ;;
     esac
+    # Kill any lingering daemon process not managed by the service (e.g. manually started)
+    pkill -f "$SHARE_DIR/daemon" 2>/dev/null || true
 }
 
 # Install files
@@ -312,15 +351,19 @@ uninstall() {
 # Cleanup function
 cleanup() {
     # Remove downloaded archive
-    if [ -f "rlc-"*".tar.xz" ]; then
+    if [ -n "$DOWNLOAD_FILE" ] && [ -f "$DOWNLOAD_FILE" ]; then
         echo "Removing downloaded archive..." >&2
-        rm -f rlc-*.tar.xz
+        rm -f "$DOWNLOAD_FILE"
     fi
     
-    # Remove temporary directory
+    # Remove temporary directories
     if [ -n "$EXTRACT_DIR" ] && [ -d "$EXTRACT_DIR" ]; then
         echo "Removing temporary files..." >&2
         rm -rf "$EXTRACT_DIR"
+    fi
+    if [ -n "$STAGE_DIR" ] && [ -d "$STAGE_DIR" ]; then
+        echo "Removing staging directory..." >&2
+        rm -rf "$STAGE_DIR"
     fi
 }
 
@@ -341,22 +384,28 @@ main() {
         exit 1
     fi
 
+    do_install() {
+        stop_service
+        install_files "$1"
+        start_service
+        verify_installation
+        echo "Installation complete" >&2
+        echo "Note: You may need to log out and back in for the service to start" >&2
+        echo "You can verify the daemon is running with: pgrep -af daemon | grep razer" >&2
+    }
+
     case $1 in
         install)
-            CONTENT_DIR=$(download_latest_release)
-            stop_service
-            install_files "$CONTENT_DIR"
-            start_service
-            verify_installation
-            echo "Installation complete" >&2
-            echo "Note: You may need to log out and back in for the service to start" >&2
-            echo "You can verify the daemon is running with: pgrep -af daemon | grep razer" >&2
+            do_install "$(download_latest_release)"
+            ;;
+        install_local)
+            do_install "$(prepare_local_build)"
             ;;
         uninstall)
             uninstall
             ;;
         *)
-            echo "Usage: $0 <install/uninstall>" >&2
+            echo "Usage: $0 <install/install_local/uninstall>" >&2
             exit 1
             ;;
     esac

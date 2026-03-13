@@ -40,6 +40,7 @@ jobs:
           cp data/devices/laptops.json "$RELEASE_DIR/"
           cp data/udev/99-hidraw-permissions.rules "$RELEASE_DIR/"
           cp data/gui/razer-settings.desktop "$RELEASE_DIR/"
+          cp -r data/services "$RELEASE_DIR/"
           
           # Create checksum file
           cd "$RELEASE_DIR"
