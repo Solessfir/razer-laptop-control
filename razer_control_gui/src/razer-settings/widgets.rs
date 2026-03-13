@@ -6,7 +6,6 @@ use gtk::{
 };
 
 pub struct SettingsPage {
-    // TODO: Can I make this a widget? This is self originally
     pub master_container: Box
 }
 
@@ -33,7 +32,6 @@ impl SettingsPage {
 }
 
 pub struct SettingsRow {
-    // TODO: Can I make this a widget? This is self originally
     pub master_container: ListBoxRow
 }
 
@@ -45,8 +43,6 @@ impl SettingsRow {
         // alternative_widget: Option<&impl IsA<Widget>>
     ) -> SettingsRow {
         let master_container = ListBoxRow::new();
-
-        // TODO: Faltan cosas, hay un stack que IMO no tiene sentido por ahora
 
         let hbox = Box::new(gtk::Orientation::Horizontal, 0);
         hbox.set_border_width(5);
@@ -67,7 +63,7 @@ impl SettingsRow {
 
         grid.attach(&description_box, 0, 0, 1, 1);
         grid.attach_next_to(main_widget /*stack*/, Some(&description_box), gtk::PositionType::Right, 1, 1);
-        hbox.add(&grid); // TODO: No es así como lo hacen
+        hbox.add(&grid);
         
         master_container.add(&hbox);
 
@@ -79,7 +75,6 @@ impl SettingsRow {
     #[allow(dead_code)]
     pub fn add_section(&self, title: Option<&str>) -> SettingsSection {
         let section = SettingsSection::new(title);
-        // self.master_container.pack_start(&section.master_container, false, false, 0); TODO: It should be this
         self.master_container.add(&section.master_container);
         section
     }
@@ -87,7 +82,6 @@ impl SettingsRow {
 }
 
 pub struct SettingsSection {
-    // TODO: Can I make this a widget? This is self originally
     pub master_container: Box,
     container: Box,
     frame: Frame,

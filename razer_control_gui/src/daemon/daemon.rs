@@ -370,7 +370,6 @@ pub fn process_client_request(cmd: comms::DaemonCommand) -> Option<comms::Daemon
         }
 
         comms::DaemonCommand::SetStandardEffect{ name, params } => {
-            // TODO save standart effect may be struct ?
             let res;
             if let Some(laptop) = d.get_device() {
                 {

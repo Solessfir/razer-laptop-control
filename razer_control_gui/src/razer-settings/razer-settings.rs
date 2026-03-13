@@ -280,13 +280,12 @@ fn main() {
         .or_crash("Failed to get device name");
 
     let app = Application::builder()
-        .application_id("com.example.hello") // TODO: Change this name
+        .application_id("io.github.solessfir.razer-laptop-control")
         .build();
 
     app.connect_activate(move |app| {
         // For now we get the device from the device name. One is duplicated but
         // its settings are the same.
-        // TODO: Document this or make it more robust
         let device = devices.iter().find(|d| d.name == device_name)
             .or_crash("Failed to get device info");
 
@@ -620,18 +619,10 @@ fn make_general_page() -> SettingsPage {
             let logo = options.active().or_crash("Illegal state"); // Unwrap: There is always one active
             
             match logo {
-                0 => {
-                    // TODO: Color 1 visible
-                },
-                1 => {
-                    // TODO: Color 1 and 2 visible
-                },
-                2 => {
-                    // TODO: Color 1 and 2 visible
-                }
-                3 => {
-                    // TODO: Color 1, 2, and duration visible
-                }
+                0 => {},
+                1 => {},
+                2 => {},
+                3 => {}
                 _ => {}
             }
         }

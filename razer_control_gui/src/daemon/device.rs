@@ -971,10 +971,7 @@ impl RazerLaptop {
         let mut report = RazerPacket::new(0x07, 0x12, 0x01);
         report.args[0] = bho_to_byte(is_on, threshold);
 
-        return self.send_report(report).map_or(false, |r| {
-            println!("Response Packet:\n{:#?}", r);
-            true
-        });
+        return self.send_report(report).is_some();
     }
 
     fn send_report(&mut self, mut report: RazerPacket) -> Option<RazerPacket> {
