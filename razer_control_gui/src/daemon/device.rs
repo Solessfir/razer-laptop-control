@@ -741,21 +741,28 @@ impl RazerLaptop {
         return ok;
     }
 
-    pub fn get_power_mode(&mut self, zone: u8) -> u8 {
-        let mut report: RazerPacket = RazerPacket::new(0x0d, 0x82, 0x04);
-        report.args[0] = 0x00;
-        report.args[1] = zone;
-        report.args[2] = 0x00;
-        report.args[3] = 0x00;
-        if let Some(response) = self.send_report(report) {
-            return response.args[2];
+    fn map_power_mode(mode: u8) -> u8 {
+        match mode {
+            0 => 0x00, // Balanced
+            1 => 0x01, // Gaming
+            2 => 0x02, // Creator
+            3 => 0x05, // Silent
+            4 => 0x04, // Custom
+            _ => 0x00,
         }
-        return 0;
+    }
+
+    fn send_preamble(&mut self) {
+        let report1: RazerPacket = RazerPacket::new(0x07, 0x8f, 0x01);
+        self.send_report(report1);
+        let mut report2: RazerPacket = RazerPacket::new(0x07, 0x0f, 0x01);
+        report2.args[0] = 0x0c;
+        self.send_report(report2);
     }
 
     fn set_power(&mut self, zone: u8) -> bool {
         let mut report: RazerPacket = RazerPacket::new(0x0d, 0x02, 0x04);
-        report.args[0] = 0x00;
+        report.args[0] = 0x01;
         report.args[1] = zone;
         report.args[2] = self.power;
         match self.fan_rpm {
@@ -769,15 +776,15 @@ impl RazerLaptop {
         return false;
     }
 
-    pub fn get_cpu_boost(&mut self) -> u8 {
-        let mut report: RazerPacket = RazerPacket::new(0x0d, 0x87, 0x03);
-        report.args[0] = 0x00;
-        report.args[1] = 0x01;
-        report.args[2] = 0x00;
-        if let Some(response) = self.send_report(report) {
-            return response.args[2];
+    fn set_tdp_tier(&mut self, zone: u8, tier: u8) -> bool {
+        let mut report: RazerPacket = RazerPacket::new(0x0d, 0x07, 0x03);
+        report.args[0] = 0x01;
+        report.args[1] = zone;
+        report.args[2] = tier;
+        if let Some(_) = self.send_report(report) {
+            return true;
         }
-        return 0;
+        return false;
     }
 
     fn set_cpu_boost(&mut self, mut boost: u8) -> bool {
@@ -795,17 +802,6 @@ impl RazerLaptop {
         return false;
     }
 
-    fn get_gpu_boost(&mut self) -> u8 {
-        let mut report: RazerPacket = RazerPacket::new(0x0d, 0x87, 0x03);
-        report.args[0] = 0x00;
-        report.args[1] = 0x02;
-        report.args[2] = 0x00;
-        if let Some(response) = self.send_report(report) {
-            return response.args[2];
-        }
-        return 0;
-    }
-
     fn set_gpu_boost(&mut self, boost: u8) -> bool {
         let mut report: RazerPacket = RazerPacket::new(0x0d, 0x07, 0x03);
         report.args[0] = 0x00;
@@ -818,22 +814,27 @@ impl RazerLaptop {
     }
 
     pub fn set_power_mode(&mut self, mode: u8, cpu_boost: u8, gpu_boost: u8) -> bool {
+        let hw_mode = Self::map_power_mode(mode);
         if mode <= 3 {
-            self.power = mode;
+            self.power = hw_mode;
             self.fan_rpm = 0; // revert to automatic fan control
+            self.send_preamble();
             self.set_power(0x01);
             self.set_power(0x02);
+            self.set_power(0x03);
+            self.set_power(0x04);
         } else if mode == 4 {
-            self.power = mode;
+            self.power = hw_mode;
             self.fan_rpm = 0;
-            self.get_power_mode(0x01);
+            self.send_preamble();
             self.set_power(0x01);
-            self.get_cpu_boost();
-            self.set_cpu_boost(cpu_boost);
-            self.get_gpu_boost();
-            self.set_gpu_boost(gpu_boost);
-            self.get_power_mode(0x02);
             self.set_power(0x02);
+            self.set_power(0x03);
+            self.set_power(0x04);
+            self.set_tdp_tier(0x01, 0x03); // CPU TDP tier
+            self.set_tdp_tier(0x02, 0x02); // GPU TDP tier
+            self.set_cpu_boost(cpu_boost);
+            self.set_gpu_boost(gpu_boost);
         }
 
         return true;
@@ -858,12 +859,10 @@ impl RazerLaptop {
                 true => self.fan_rpm = value as u8,
                 false => self.fan_rpm = self.clamp_fan(value),
             }
-            self.get_power_mode(0x01);
             self.set_power(0x01);
             if value != 0 {
                 self.set_rpm(0x01);
             }
-            self.get_power_mode(0x02);
             self.set_power(0x02);
             if value != 0 {
                 self.set_rpm(0x02);
