@@ -36,11 +36,9 @@ pub struct SettingsRow {
 }
 
 impl SettingsRow {
-    
     pub fn new(
         label: &impl IsA<Widget>,
         main_widget: &impl IsA<Widget>,
-        // alternative_widget: Option<&impl IsA<Widget>>
     ) -> SettingsRow {
         let master_container = ListBoxRow::new();
 
@@ -48,17 +46,14 @@ impl SettingsRow {
         hbox.set_border_width(5);
         hbox.set_margin_start(20);
         hbox.set_margin_end(20);
-        // master_container.add(&hbox);
 
         let grid = Grid::new();
         grid.set_column_spacing(15);
-        // hbox.pack_start(&grid, true, true, 0);
 
         let description_box = Box::new(gtk::Orientation::Vertical, 0);
         description_box.set_hexpand(true);
         description_box.set_halign(gtk::Align::Start);
         description_box.set_valign(gtk::Align::Center);
-        // self.label.props.xalign = 0.0
         description_box.add(label);
 
         grid.attach(&description_box, 0, 0, 1, 1);
@@ -70,13 +65,6 @@ impl SettingsRow {
         SettingsRow {
             master_container
         }
-    }
-
-    #[allow(dead_code)]
-    pub fn add_section(&self, title: Option<&str>) -> SettingsSection {
-        let section = SettingsSection::new(title);
-        self.master_container.add(&section.master_container);
-        section
     }
 
 }
@@ -100,7 +88,6 @@ impl SettingsSection {
 
             let label = Label::new(None);
             label.set_markup(&format!("<b>{}</b>", title));
-            // Aligmnent 0, 0.5
             label.set_halign(gtk::Align::Start);
             header_box.add(&label);
         }
@@ -108,8 +95,6 @@ impl SettingsSection {
         let frame = Frame::new(None);
         frame.set_shadow_type(gtk::ShadowType::In);
         frame.style_context().add_class("view");
-        // bho_frame.set_hexpand(true);
-        // Algo de size group
 
         let container = Box::new(gtk::Orientation::Vertical, 0);
         frame.add(&container);

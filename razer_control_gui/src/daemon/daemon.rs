@@ -131,7 +131,6 @@ fn init_logging() {
 
 /// Handles keyboard animations
 pub fn start_keyboard_animator_task() -> JoinHandle<()> {
-    // Start the keyboard animator thread,
     thread::spawn(|| {
         loop {
             let light_control_enabled = dev_manager().get_light_control();
@@ -340,6 +339,8 @@ pub fn process_client_request(cmd: comms::DaemonCommand) -> Option<comms::Daemon
         comms::DaemonCommand::GetCPUBoost{ac} => Some(comms::DaemonResponse::GetCPUBoost { cpu: d.get_cpu_boost(ac) }),
         comms::DaemonCommand::GetGPUBoost{ac} => Some(comms::DaemonResponse::GetGPUBoost { gpu: d.get_gpu_boost(ac) }),
         comms::DaemonCommand::SetEffect{ name, params } => {
+            // Ensure light control is enabled when explicitly setting a custom effect
+            d.set_light_control(true);
             let mut res;
             {
                 let mut k = effect_manager();
@@ -370,6 +371,8 @@ pub fn process_client_request(cmd: comms::DaemonCommand) -> Option<comms::Daemon
         }
 
         comms::DaemonCommand::SetStandardEffect{ name, params } => {
+            // Ensure light control is enabled when explicitly setting an effect
+            d.set_light_control(true);
             let res;
             if let Some(laptop) = d.get_device() {
                 {

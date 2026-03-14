@@ -37,7 +37,7 @@ pub fn crash_with_msg(msg: impl AsRef<str>) -> ! {
 }
 
 fn show_msg(msg: impl AsRef<str>) {
-    let msg = format!("{}.\n\nThis is an alpha!", msg.as_ref());
+    let msg = format!("{}.", msg.as_ref());
 
     let msg_box = MessageDialog::new::<ApplicationWindow>(
         None, DialogFlags::MODAL,

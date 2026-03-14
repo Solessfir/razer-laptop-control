@@ -1,4 +1,3 @@
-// mod kbd;
 use crate::battery;
 use crate::config;
 use crate::dbus_mutter_idlemonitor;
@@ -27,14 +26,8 @@ pub struct RazerPacket {
 }
 
 impl RazerPacket {
-    // Command status
     const RAZER_CMD_NEW: u8 = 0x00;
-    // const RAZER_CMD_BUSY:u8 = 0x01;
     const RAZER_CMD_SUCCESSFUL: u8 = 0x02;
-    // const RAZER_CMD_FAILURE:u8 = 0x03;
-    // const RAZER_CMD_TIMEOUT:u8 =0x04;
-    #[allow(dead_code)]
-    const RAZER_CMD_NOT_SUPPORTED: u8 = 0x05;
 
     fn new(command_class: u8, command_id: u8, data_size: u8) -> RazerPacket {
         return RazerPacket {
@@ -255,7 +248,6 @@ impl DeviceManager {
     }
 
     pub fn change_idle(&mut self, ac: usize, timeout: u32) -> bool {
-        // let mut arm: bool = false;
         if let Some(config) = self.get_config() {
             if config.power[ac].idle != timeout {
                 config.power[ac].idle = timeout;
@@ -266,7 +258,6 @@ impl DeviceManager {
                 if let Err(e) = config.write_to_file() {
                     eprintln!("Error write config {:?}", e);
                 }
-                // arm = true;
                 self.change_idle = true;
             }
         }
@@ -359,12 +350,6 @@ impl DeviceManager {
     }
 
     pub fn get_logo_led_state(&mut self, ac: usize) -> u8 {
-        // if let Some(laptop) = self.get_device() {
-        // if laptop.ac_state as usize == ac {
-        // return laptop.get_logo_led_state();
-        // }
-        // }
-
         if let Some(config) = self.get_ac_config(ac) {
             return config.logo_state;
         }
@@ -435,12 +420,6 @@ impl DeviceManager {
     }
 
     pub fn get_power_mode(&mut self, ac: usize) -> u8 {
-        if let Some(laptop) = self.get_device() {
-            if laptop.ac_state as usize == ac {
-                return laptop.get_power_mode(0x01);
-            }
-        }
-
         if let Some(config) = self.get_ac_config(ac) {
             return config.power_mode;
         }
@@ -449,12 +428,6 @@ impl DeviceManager {
     }
 
     pub fn get_cpu_boost(&mut self, ac: usize) -> u8 {
-        if let Some(laptop) = self.get_device() {
-            if laptop.ac_state as usize == ac {
-                return laptop.get_cpu_boost();
-            }
-        }
-
         if let Some(config) = self.get_ac_config(ac) {
             return config.cpu_boost;
         }
@@ -463,12 +436,6 @@ impl DeviceManager {
     }
 
     pub fn get_gpu_boost(&mut self, ac: usize) -> u8 {
-        if let Some(laptop) = self.get_device() {
-            if laptop.ac_state as usize == ac {
-                return laptop.get_gpu_boost();
-            }
-        }
-
         if let Some(config) = self.get_ac_config(ac) {
             return config.gpu_boost;
         }
@@ -531,10 +498,6 @@ impl DeviceManager {
         return self.config.as_mut();
     }
 
-    // pub fn set_device(&mut self, device: RazerLaptop) {
-    // self.device = Some(device);
-    // }
-
     pub fn find_supported_device(&mut self, vid: u16, pid: u16) -> Option<&SupportedDevice> {
         for device in &self.supported_devices {
             // Unwrap: we control the strings and know they are are valid
@@ -553,10 +516,22 @@ impl DeviceManager {
         match HidApi::new() {
             Ok(api) => {
                 // First pass: find the main control interface
-                let mut found: Option<(CString, u16, u16, String, Vec<String>, Vec<u16>, Option<i32>)> = None;
+                let mut found: Option<(
+                    CString,
+                    u16,
+                    u16,
+                    String,
+                    Vec<String>,
+                    Vec<u16>,
+                    Option<i32>,
+                )> = None;
 
-                for device in api.device_list().filter(|d| d.vendor_id() == RAZER_VENDOR_ID) {
-                    let result = self.find_supported_device(device.vendor_id(), device.product_id());
+                for device in api
+                    .device_list()
+                    .filter(|d| d.vendor_id() == RAZER_VENDOR_ID)
+                {
+                    let result =
+                        self.find_supported_device(device.vendor_id(), device.product_id());
                     if let Some(supported) = result {
                         let required_interface = supported.interface.unwrap_or(0);
                         if device.interface_number() == required_interface {
@@ -578,14 +553,19 @@ impl DeviceManager {
                     // Find kbd interface path if specified
                     let kbd_path = kbd_interface.and_then(|iface| {
                         api.device_list()
-                            .find(|d| d.vendor_id() == vid && d.product_id() == pid && d.interface_number() == iface)
+                            .find(|d| {
+                                d.vendor_id() == vid
+                                    && d.product_id() == pid
+                                    && d.interface_number() == iface
+                            })
                             .map(|d| d.path().to_owned())
                     });
 
                     match api.open_path(&path) {
                         Ok(dev) => {
                             let kbd_device = kbd_path.and_then(|kp| api.open_path(&kp).ok());
-                            self.device = Some(RazerLaptop::new(name, features, fan, dev, kbd_device));
+                            self.device =
+                                Some(RazerLaptop::new(name, features, fan, dev, kbd_device));
                         }
                         Err(e) => {
                             eprintln!("Error: {}", e);
@@ -612,25 +592,22 @@ pub struct RazerLaptop {
     fan_rpm: u8,  // need for power
     ac_state: u8, // index config array
     screensaver: bool,
+    brightness: u8, // re-applied after mode switch to counteract firmware reset
+    custom_frame_active: bool, // true once keyboard is in custom frame mode
 }
-//
+
 impl RazerLaptop {
-    // LED STORAGE Options
     const NOSTORE: u8 = 0x00;
     const VARSTORE: u8 = 0x01;
-    // LED definitions
     const LOGO_LED: u8 = 0x04;
     const BACKLIGHT_LED: u8 = 0x05;
-    // effects
     pub const OFF: u8 = 0x00;
     pub const WAVE: u8 = 0x01;
-    pub const REACTIVE: u8 = 0x02; // Afterglo
-    #[allow(dead_code)]
+    pub const REACTIVE: u8 = 0x02;
     pub const BREATHING: u8 = 0x03;
     pub const SPECTRUM: u8 = 0x04;
     pub const CUSTOMFRAME: u8 = 0x05;
     pub const STATIC: u8 = 0x06;
-    #[allow(dead_code)]
     pub const STARLIGHT: u8 = 0x19;
 
     pub fn new(
@@ -650,6 +627,8 @@ impl RazerLaptop {
             fan_rpm: 0,
             ac_state: 0,
             screensaver: false,
+            brightness: 0,
+            custom_frame_active: false,
         };
     }
 
@@ -718,6 +697,7 @@ impl RazerLaptop {
     }
 
     pub fn set_standard_effect(&mut self, effect_id: u8, params: Vec<u8>) -> bool {
+        self.custom_frame_active = false;
         let mut report: RazerPacket = RazerPacket::new(0x03, 0x0a, 80);
         report.args[0] = effect_id; // effect id
         if !params.is_empty() {
@@ -733,7 +713,6 @@ impl RazerLaptop {
     }
 
     pub fn set_custom_frame_data(&mut self, row: u8, data: Vec<u8>) {
-        // if data.len() == kbd::board::KEYS_PER_ROW {
         if data.len() == 45 {
             let mut report: RazerPacket = RazerPacket::new(0x03, 0x0b, 0x34);
             report.args[0] = 0xff;
@@ -751,11 +730,15 @@ impl RazerLaptop {
         let mut report: RazerPacket = RazerPacket::new(0x03, 0x0a, 0x02);
         report.args[0] = RazerLaptop::CUSTOMFRAME; // effect id
         report.args[1] = RazerLaptop::NOSTORE;
-        if let Some(_) = self.send_report(report) {
-            return true;
+        let ok = self.send_report(report).is_some();
+        // Firmware resets brightness when transitioning into custom frame mode.
+        // Re-apply it once on the first activation; subsequent frames don't need this.
+        if ok && !self.custom_frame_active && self.brightness > 0 {
+            self.custom_frame_active = true;
+            let brightness = self.brightness;
+            self.set_brightness(brightness);
         }
-
-        return false;
+        return ok;
     }
 
     pub fn get_power_mode(&mut self, zone: u8) -> u8 {
@@ -837,6 +820,7 @@ impl RazerLaptop {
     pub fn set_power_mode(&mut self, mode: u8, cpu_boost: u8, gpu_boost: u8) -> bool {
         if mode <= 3 {
             self.power = mode;
+            self.fan_rpm = 0; // revert to automatic fan control
             self.set_power(0x01);
             self.set_power(0x02);
         } else if mode == 4 {
@@ -918,18 +902,8 @@ impl RazerLaptop {
         return false;
     }
 
-    #[allow(dead_code)]
-    pub fn get_logo_led_state(&mut self) -> u8 {
-        let mut report: RazerPacket = RazerPacket::new(0x03, 0x82, 0x03);
-        report.args[0] = RazerLaptop::VARSTORE;
-        report.args[1] = RazerLaptop::LOGO_LED;
-        if let Some(response) = self.send_report(report) {
-            return response.args[2];
-        }
-        return 0;
-    }
-
     pub fn set_brightness(&mut self, brightness: u8) -> bool {
+        self.brightness = brightness;
         let mut report: RazerPacket = RazerPacket::new(0x03, 0x03, 0x03);
         report.args[0] = RazerLaptop::VARSTORE;
         report.args[1] = RazerLaptop::BACKLIGHT_LED;
@@ -979,16 +953,22 @@ impl RazerLaptop {
         let use_kbd = report.command_class == 0x03 && self.kbd_device.is_some();
         for _ in 0..3 {
             let send_result = if use_kbd {
-                self.kbd_device.as_mut().unwrap().send_feature_report(report.calc_crc().as_slice())
+                self.kbd_device
+                    .as_mut()
+                    .unwrap()
+                    .send_feature_report(report.calc_crc().as_slice())
             } else {
-                self.device.send_feature_report(report.calc_crc().as_slice())
+                self.device
+                    .send_feature_report(report.calc_crc().as_slice())
             };
-            match send_result
-            {
+            match send_result {
                 Ok(_) => {
                     thread::sleep(time::Duration::from_micros(1000));
                     let recv_result = if use_kbd {
-                        self.kbd_device.as_mut().unwrap().get_feature_report(&mut temp_buf)
+                        self.kbd_device
+                            .as_mut()
+                            .unwrap()
+                            .get_feature_report(&mut temp_buf)
                     } else {
                         self.device.get_feature_report(&mut temp_buf)
                     };

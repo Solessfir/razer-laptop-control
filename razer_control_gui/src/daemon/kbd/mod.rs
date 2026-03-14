@@ -121,10 +121,6 @@ impl EffectLayer {
     pub fn get_state(&mut self) -> Vec<u8> {
         self.effect.get_state()
     }
-    #[allow(dead_code)]
-    pub fn get_mask(&mut self) -> Vec<bool> {
-        self.key_mask.to_vec()
-    }
 }
 pub struct EffectManager {
     layers: Vec<EffectLayer>,

@@ -7,9 +7,6 @@ use gtk::{
     ComboBoxText, Button, ColorButton, LinkButton
 };
 use gtk::{glib, glib::clone};
-        
-// sudo apt install libgdk-pixbuf2.0-dev libcairo-dev libatk1.0-dev
-// sudo apt install libpango1.0-dev
 
 #[path = "../comms.rs"]
 mod comms;
@@ -293,7 +290,7 @@ fn main() {
             .application(app)
             .default_width(640)
             .default_height(480)
-            .title("Razer Settings")
+            .title("Razer Laptop Control")
             .window_position(gtk::WindowPosition::Center)
             .build();
 
@@ -323,15 +320,12 @@ fn main() {
         stack_switcher.connect_screen_changed(|_, _| {
             println!("Page changed");
         });
-        
+
         let vbox = gtk::Box::new(gtk::Orientation::Vertical, 0);
         let toolbar = Toolbar::new();
         toolbar.style_context().add_class("primary-toolbar");
         vbox.pack_start(&toolbar, false, false, 0);
         vbox.pack_start(&stack, true, true, 0);
-        // header_bar.set_title(Some("Razer Settings"));
-        // header_bar.set_child(Some(&stack_switcher));
-        // window.set_titlebar(Some(&header_bar));
         let tool_item = ToolItem::new();
         gtk::prelude::ToolItemExt::set_expand(&tool_item, true);
         tool_item.style_context().add_class("raised");
@@ -389,6 +383,7 @@ fn make_page(ac: bool, device: SupportedDevice) -> SettingsPage {
     }
 
     // Power section
+    // All models use: 0=Balanced, 1=Gaming, 2=Creator, 3=Silent, 4=Custom
     if let Some(power) = power {
         let settings_section = settings_page.add_section(Some("Power"));
             let label = Label::new(Some("Power Profile"));
@@ -617,7 +612,7 @@ fn make_general_page() -> SettingsPage {
     effect_options.connect_changed(clone!(@weak color_picker, @weak color_picker_2 =>
         move |options| {
             let logo = options.active().or_crash("Illegal state"); // Unwrap: There is always one active
-            
+
             match logo {
                 0 => {},
                 1 => {},
@@ -647,7 +642,7 @@ fn make_general_page() -> SettingsPage {
                 set_bho(is_on, threshold).or_crash("Error setting bho");
 
                 let (is_on, threshold) = get_bho().or_crash("Error reading bho");
-                
+
                 scale.set_value(threshold as f64);
                 scale.set_visible(is_on);
                 scale.set_sensitive(is_on);
@@ -658,12 +653,12 @@ fn make_general_page() -> SettingsPage {
             switch.connect_changed_active(clone!(@weak scale => move |switch| {
                 let is_on = switch.is_active();
                 let threshold = scale.value().clamp(50f64, 80f64) as u8;
-                
+
                 set_bho(is_on, threshold); // Ignoramos errores ya que leemos
                                            // el resultado de vuelta
 
                 let (is_on, threshold) = get_bho().or_crash("Error reading bho");
-                
+
                 scale.set_value(threshold as f64);
                 scale.set_visible(is_on);
                 scale.set_sensitive(is_on);
@@ -681,10 +676,10 @@ fn make_about_page(device: SupportedDevice) -> SettingsPage {
     // About page
     let settings_section = page.add_section(Some("Razer Laptop Control"));
         let label = Label::new(Some("Project"));
-        let url = LinkButton::with_label("https://github.com/JosuGZ/razer-laptop-control", "Project repository");
+        let url = LinkButton::with_label("https://github.com/Solessfir/razer-laptop-control", "Project repository");
     let row = SettingsRow::new(&label, &url);
     settings_section.add_row(&row.master_container);
-        let report_bug_url = "https://github.com/JosuGZ/razer-laptop-control/issues/new?labels=bug&template=bug_report.md&title=%5BBUG%5D";
+        let report_bug_url = "https://github.com/Solessfir/razer-laptop-control/issues/new?labels=bug&template=bug_report.md&title=%5BBUG%5D";
         let label = Label::new(Some("Bug reports"));
         let url = LinkButton::with_label(report_bug_url, "Report bug");
     let row = SettingsRow::new(&label, &url);

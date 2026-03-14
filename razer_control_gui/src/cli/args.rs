@@ -85,7 +85,7 @@ pub enum WriteAttr {
 pub struct PowerParams {
     /// battery/plugged in
     pub ac_state: AcState,
-    /// power mode (0, 1, 2, 3 or 4)
+    /// power mode (0=Balanced, 1=Gaming, 2=Creator, 3=Silent, 4=Custom)
     pub pwr: u8,
     /// cpu boost (0, 1, 2 or 3)
     pub cpu_mode: Option<u8>,
