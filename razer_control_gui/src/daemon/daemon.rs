@@ -247,14 +247,18 @@ fn start_battery_monitor_task() -> JoinHandle<()> {
 
         let _id = proxy_login.match_signal(|h: login1::OrgFreedesktopLogin1ManagerPrepareForSleep, _: &Connection, _: &Message| {
             info!("PrepareForSleep {:?}", h.start);
-            {
-                let mut d = dev_manager();
-                d.set_ac_state_get();
-                if h.start {
-                    d.light_off();
-                } else {
+            if h.start {
+                dev_manager().light_off();
+            } else {
+                // Spawn so D-Bus processing isn't blocked during USB re-enumeration
+                thread::spawn(|| {
+                    thread::sleep(time::Duration::from_secs(2));
+                    let mut d = dev_manager();
+                    info!("Reconnecting after wake");
+                    d.discover_devices();
+                    d.set_ac_state_get();
                     d.restore_light();
-                }
+                });
             }
             true
         });

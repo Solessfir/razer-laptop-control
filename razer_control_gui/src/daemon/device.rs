@@ -752,12 +752,13 @@ impl RazerLaptop {
         }
     }
 
-    fn send_preamble(&mut self) {
+    fn send_preamble(&mut self) -> bool {
         let report1: RazerPacket = RazerPacket::new(0x07, 0x8f, 0x01);
-        self.send_report(report1);
+        let ok1 = self.send_report(report1).is_some();
         let mut report2: RazerPacket = RazerPacket::new(0x07, 0x0f, 0x01);
         report2.args[0] = 0x0c;
-        self.send_report(report2);
+        let ok2 = self.send_report(report2).is_some();
+        ok1 && ok2
     }
 
     fn set_power(&mut self, zone: u8) -> bool {
@@ -818,7 +819,9 @@ impl RazerLaptop {
         if mode <= 3 {
             self.power = hw_mode;
             self.fan_rpm = 0; // revert to automatic fan control
-            self.send_preamble();
+            if !self.send_preamble() {
+                eprintln!("Warning: power mode preamble timed out, proceeding anyway");
+            }
             self.set_power(0x01);
             self.set_power(0x02);
             self.set_power(0x03);
@@ -826,7 +829,9 @@ impl RazerLaptop {
         } else if mode == 4 {
             self.power = hw_mode;
             self.fan_rpm = 0;
-            self.send_preamble();
+            if !self.send_preamble() {
+                eprintln!("Warning: power mode preamble timed out, proceeding anyway");
+            }
             self.set_power(0x01);
             self.set_power(0x02);
             self.set_power(0x03);
