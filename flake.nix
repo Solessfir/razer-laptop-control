@@ -47,10 +47,10 @@
               mkdir -p $out/share/applications
               cat > ${path} <<EOF
               [Desktop Entry]
-              Name=Razer Settings
+              Name=Razer Laptop Control
               Exec=$out/bin/${app}
               Type=Application
-              Categories=Utility;
+              Categories=Settings;HardwareSettings;System;
               EOF
               chmod +x ${path}
             '';
