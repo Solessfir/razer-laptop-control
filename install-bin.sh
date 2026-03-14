@@ -54,6 +54,7 @@ prepare_local_build() {
     cp "$BUILD_DIR/data/devices/laptops.json"                      "$STAGE_DIR/laptops.json"
     cp "$BUILD_DIR/data/udev/99-hidraw-permissions.rules"          "$STAGE_DIR/99-hidraw-permissions.rules"
     cp "$BUILD_DIR/data/gui/razer-settings.desktop"                "$STAGE_DIR/razer-settings.desktop"
+    cp "$BUILD_DIR/data/gui/icon.png"                              "$STAGE_DIR/icon.png"
     cp "$BUILD_DIR/data/services/systemd/razercontrol.service"     "$STAGE_DIR/services/systemd/razercontrol.service"
     cp "$BUILD_DIR/data/services/openrc/razercontrol"              "$STAGE_DIR/services/openrc/razercontrol"
 
@@ -126,12 +127,18 @@ install_files() {
     sudo install -m644 "$content_dir/laptops.json" "$SHARE_DIR" || echo "Failed to install laptops.json" >&2
     sudo install -m644 "$content_dir/99-hidraw-permissions.rules" "$RULES_DIR" || echo "Failed to install udev rules" >&2
     
-    # Install desktop file if desktop environment exists
+    # Install desktop file and icon if desktop environment exists
     if [ -d "/usr/share/applications" ] && [ -d "$HOME/.config" ]; then
         if [ -f "$content_dir/razer-settings.desktop" ]; then
             sudo install -m644 "$content_dir/razer-settings.desktop" "$APPLICATIONS_DIR"
         else
             echo "Warning: Desktop file not found" >&2
+        fi
+        if [ -f "$content_dir/icon.png" ]; then
+            ICON_DIR="/usr/share/icons/hicolor/256x256/apps"
+            sudo mkdir -p "$ICON_DIR"
+            sudo install -m644 "$content_dir/icon.png" "$ICON_DIR/io.github.solessfir.razer-laptop-control.png"
+            sudo gtk-update-icon-cache /usr/share/icons/hicolor 2>/dev/null || true
         fi
     fi
     
@@ -321,6 +328,7 @@ uninstall() {
     sudo rm -f "$BIN_DIR/razer-cli"
     sudo rm -f "$BIN_DIR/razer-settings"
     sudo rm -f "$APPLICATIONS_DIR/razer-settings.desktop"
+    sudo rm -f "/usr/share/icons/hicolor/256x256/apps/io.github.solessfir.razer-laptop-control.png"
     sudo rm -f "$SHARE_DIR/daemon"
     sudo rm -f "$SHARE_DIR/laptops.json"
     sudo rm -f "$RULES_DIR/99-hidraw-permissions.rules"
