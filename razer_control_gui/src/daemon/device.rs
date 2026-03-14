@@ -752,11 +752,11 @@ impl RazerLaptop {
         }
     }
 
-    fn send_preamble(&mut self) -> bool {
+    fn send_preamble(&mut self, mode: u8) -> bool {
         let report1: RazerPacket = RazerPacket::new(0x07, 0x8f, 0x01);
         let ok1 = self.send_report(report1).is_some();
         let mut report2: RazerPacket = RazerPacket::new(0x07, 0x0f, 0x01);
-        report2.args[0] = 0x0c;
+        report2.args[0] = mode;
         let ok2 = self.send_report(report2).is_some();
         ok1 && ok2
     }
@@ -819,7 +819,7 @@ impl RazerLaptop {
         if mode <= 3 {
             self.power = hw_mode;
             self.fan_rpm = 0; // revert to automatic fan control
-            if !self.send_preamble() {
+            if !self.send_preamble(0x0c) {
                 eprintln!("Warning: power mode preamble timed out, proceeding anyway");
             }
             self.set_power(0x01);
@@ -829,7 +829,7 @@ impl RazerLaptop {
         } else if mode == 4 {
             self.power = hw_mode;
             self.fan_rpm = 0;
-            if !self.send_preamble() {
+            if !self.send_preamble(0x0c) {
                 eprintln!("Warning: power mode preamble timed out, proceeding anyway");
             }
             self.set_power(0x01);
@@ -847,8 +847,7 @@ impl RazerLaptop {
 
     fn set_rpm(&mut self, zone: u8) -> bool {
         let mut report: RazerPacket = RazerPacket::new(0x0d, 0x01, 0x03);
-        // Set fan RPM
-        report.args[0] = 0x00;
+        report.args[0] = 0x01;
         report.args[1] = zone;
         report.args[2] = self.fan_rpm;
         if let Some(_) = self.send_report(report) {
@@ -860,17 +859,28 @@ impl RazerLaptop {
 
     pub fn set_fan_rpm(&mut self, value: u16) -> bool {
         if self.power != 4 {
-            match value == 0 {
-                true => self.fan_rpm = value as u8,
-                false => self.fan_rpm = self.clamp_fan(value),
-            }
-            self.set_power(0x01);
-            if value != 0 {
+            if value == 0 {
+                self.fan_rpm = 0;
+                if !self.send_preamble(0x0c) {
+                    eprintln!("Warning: fan preamble timed out, proceeding anyway");
+                }
+                self.set_power(0x01);
+                self.set_power(0x02);
+                self.set_power(0x03);
+                self.set_power(0x04);
+            } else {
+                self.fan_rpm = self.clamp_fan(value);
+                if !self.send_preamble(0x08) {
+                    eprintln!("Warning: fan preamble timed out, proceeding anyway");
+                }
+                self.set_power(0x01);
+                self.set_power(0x02);
+                self.set_power(0x03);
+                self.set_power(0x04);
                 self.set_rpm(0x01);
-            }
-            self.set_power(0x02);
-            if value != 0 {
                 self.set_rpm(0x02);
+                self.set_rpm(0x03);
+                self.set_rpm(0x04);
             }
         }
 
