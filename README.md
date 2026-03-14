@@ -93,13 +93,11 @@ razer-cli effect static 255 0 0
 ```
 
 ## Power Modes
-| Value | Mode |
-|-------|------|
-| 0 | Balanced |
-| 1 | Gaming |
-| 2 | Creator |
-| 3 | Silent |
-| 4 | Custom (requires cpu\_boost and gpu\_boost) |
+* 0 - Balanced
+* 1 - Gaming
+* 2 - Creator
+* 3 - Silent
+* 4 - Custom (requires cpu\_boost and gpu\_boost)
 
 Custom mode with CPU/GPU boost:
 ```sh
