@@ -48,8 +48,20 @@ jobs:
       # According to this, sudo sould run ok: https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#administrative-privileges
       run: ./install.sh install
     - name: "Check installation"
-      working-directory: ./razer_control_gui
-      run: ../ci-helpers/check-installation.sh
+      run: |
+        for f in \
+          "$HOME/.local/share/razercontrol" \
+          "/usr/share/razercontrol/daemon" \
+          "/usr/share/razercontrol/laptops.json" \
+          "/etc/udev/rules.d/99-hidraw-permissions.rules" \
+          "/usr/bin/razer-cli" \
+          "/usr/bin/razer-settings" \
+          "/usr/share/applications/razer-settings.desktop"; do
+          test -e "$f" || { echo "Missing: $f"; exit 1; }
+        done
+        systemctl --user is-enabled razercontrol.service
+        which razer-cli
+        which razer-settings
 
   build-nix:
     name: "Build and check Nix"
