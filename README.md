@@ -104,15 +104,15 @@ Custom mode with CPU/GPU boost:
 razer-cli write power ac 4 <cpu_boost> <gpu_boost>
 ```
 CPU boost levels:
-* 0 = Low
-* 1 = Normal
-* 2 = High
-* 3 = Boost (only on models with `boost` feature)
+* 0 - Low
+* 1 - Normal
+* 2 - High
+* 3 - Boost (only on models with `boost` feature)
 
 GPU boost levels:
-* 0 = Low
-* 1 = Normal
-* 2 = High
+* 0 - Low
+* 1 - Normal
+* 2 - High
 
 ## Keyboard Effects
 
