@@ -150,4 +150,7 @@ Attributes:
 > [!NOTE]
 > Brightness changed via Fn keys is not saved by the daemon. Use `razer-cli write brightness` or the GUI to set a persistent value.
 
-## [Join the Unofficial Razer Linux Channel](https://discord.gg/GdHKf45)
+## Unofficial Razer Linux Channel
+
+You can find support on the following discord server, under the
+'razer-laptop-control' channel: [Discord link](https://discord.gg/GdHKf45).
