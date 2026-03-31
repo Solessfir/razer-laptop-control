@@ -1,5 +1,7 @@
 # Razer Laptop Control
-An application designed for Razer laptops
+This is an experimental application designed to control certain features available on Razer laptops. It is not officially supported by Razer, nor does it have dedicated maintainers for each device. Use it at your own risk.
+
+Support for devices is community-driven. Each supported model has been at least partially tested by the contributor who added it, but functionality may be incomplete or vary between devices.
 
 ![](razer_control_gui/Screenshoot.png)
 
