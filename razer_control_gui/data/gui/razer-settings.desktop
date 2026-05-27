@@ -1,6 +1,8 @@
 [Desktop Entry]
 Type=Application
-Name=Razer Settings
-Comment=Manage settings from your Razer laptop
-Exec=/usr/bin/razer-settings
+Name=Razer Laptop Control
+Comment=Configure your Razer laptop power and lighting profiles
+Exec=razer-settings
+Icon=io.github.solessfir.razer-laptop-control
 Terminal=false
+Categories=Settings;HardwareSettings;System;
