@@ -63,9 +63,7 @@
 
           '';
 
-          cargoLock = {
-            lockFile = ./Cargo.lock;
-          };
+          cargoHash = "sha256-F8sfQULz3hA+sCXc/hePaQzUilgf5OMe1oPS1UBb57s=";
         };
       }
     )

@@ -3,6 +3,7 @@ use service::SupportedDevice;
 use razer_laptop::razer_devices;
 use razer_laptop::razer_hidapi::RazerHidapi;
 use razer_laptop::razer_hidapi::RazerPacket;
+use std::collections::HashMap;
 use std::{time, io};
 use crate::dbus_mutter_idlemonitor;
 use crate::config;
@@ -253,7 +254,7 @@ impl DeviceManager {
                 eprintln!("Error write config {:?}", e);
             }
         }
-             
+
         if let Some(laptop) = self.get_device() {
             let state = laptop.get_ac_state();
             if state != ac {
@@ -278,10 +279,10 @@ impl DeviceManager {
                 eprintln!("Error write config {:?}", e);
             }
         }
-             
+
         if let Some(laptop) = self.get_device() {
             let state = laptop.get_ac_state();
-           
+
             if state != ac {
                 res = true;
             } else {
@@ -298,7 +299,7 @@ impl DeviceManager {
                 // return laptop.get_logo_led_state();
             // }
         // }
-    
+
         if let Some(config) = self.get_ac_config(ac) {
             return config.logo_state;
         }
@@ -319,7 +320,7 @@ impl DeviceManager {
                 eprintln!("Error write config {:?}", e);
             }
         }
- 
+
         if let Some(laptop) = self.get_device() {
             let state = laptop.get_ac_state();
             if state != ac {
@@ -456,7 +457,7 @@ impl DeviceManager {
         self.get_device()
             .and_then(|laptop| laptop.get_bho()
             .map(byte_to_bho))
-    } 
+    }
 
     fn get_config(&mut  self) -> Option<&mut config::Configuration> {
         self.config.as_mut()
@@ -494,6 +495,7 @@ impl DeviceManager {
                                     supported_device.name.clone(),
                                     supported_device.features.clone(),
                                     supported_device.fan.clone(),
+                                    supported_device.power_modes.clone(),
                                     device
                                 ));
                                 break;
@@ -516,6 +518,7 @@ pub struct RazerLaptop {
     name: String,
     features: Vec<String>,
     fan: Vec<u16>,
+    power_modes: Option<HashMap<u8, u8>>,
     device: RazerHidapi,
     power: u8, // need for fan
     fan_rpm: u8, // need for power
@@ -542,11 +545,43 @@ impl RazerLaptop {
     #[allow(dead_code)]
     pub const STARLIGHT:u8 = 0x19;
 
-    pub fn new(name: String, features: Vec<String>, fan: Vec<u16>, device: RazerHidapi) -> RazerLaptop {
+    // UI/device power-mode mapping.
+    //
+    // Razer firmware opcodes (ui_mode == device_byte by default):
+    //   0x00 Balanced       (all models)
+    //   0x01 Gaming         (all models)
+    //   0x02 Creator        (all models)
+    //   0x03 BatterySaver/Ultrabook/LowPower (older models — labeled "Silent" in UI)
+    //   0x04 Custom         (added ~2020)
+    //   0x05 Silent         (added ~2022 — Blade 16/18 2024 etc.)
+    //   0x06 Normal, 0x07 Performance (newest models)
+    //
+    // Models needing a non-identity mapping supply a `power_modes` override in
+    // laptops.json (ui_mode -> device_byte). Absent override = identity.
+    fn power_mode_to_device(&self, ui_mode: u8) -> u8 {
+        self.power_modes
+            .as_ref()
+            .and_then(|m| m.get(&ui_mode).copied())
+            .unwrap_or(ui_mode)
+    }
+
+    fn power_mode_from_device(&self, device_byte: u8) -> u8 {
+        if let Some(map) = &self.power_modes {
+            for (&ui_mode, &byte) in map.iter() {
+                if byte == device_byte {
+                    return ui_mode;
+                }
+            }
+        }
+        device_byte
+    }
+
+    pub fn new(name: String, features: Vec<String>, fan: Vec<u16>, power_modes: Option<HashMap<u8, u8>>, device: RazerHidapi) -> RazerLaptop {
         RazerLaptop {
             name,
             features,
             fan,
+            power_modes,
             device,
             power: 0,
             fan_rpm: 0,
@@ -667,7 +702,7 @@ impl RazerLaptop {
         report.args[2] = 0x00;
         report.args[3] = 0x00;
         if let Some(response) = self.device.send_report(report) {
-            return response.args[2];
+            return self.power_mode_from_device(response.args[2]);
         }
         0
     }
@@ -676,7 +711,7 @@ impl RazerLaptop {
         let mut report: RazerPacket = RazerPacket::new(0x0d, 0x02, 0x04);
         report.args[0] = 0x00;
         report.args[1] = zone;
-        report.args[2] = self.power;
+        report.args[2] = self.power_mode_to_device(self.power);
         match self.fan_rpm {
             0 => report.args[3] = 0x00,
             _ => report.args[3] = 0x01
@@ -874,10 +909,10 @@ impl RazerLaptop {
         report.args[0] = bho_to_byte(is_on, threshold);
 
         self.device.send_report(report)
-            .map_or(false, |r| { 
-                println!("Response Packet:\n{:#?}", r); 
+            .map_or(false, |r| {
+                println!("Response Packet:\n{:#?}", r);
                 true
-            } 
+            }
         )
     }
 

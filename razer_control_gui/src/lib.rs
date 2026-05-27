@@ -1,5 +1,6 @@
 //! This is duplicated stuff for now, until we have a proper project structure
 
+use std::collections::HashMap;
 use std::fs;
 
 use serde::{Serialize, Deserialize};
@@ -19,6 +20,8 @@ pub struct SupportedDevice {
     pub pid: String,
     pub features: Vec<String>,
     pub fan: Vec<u16>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub power_modes: Option<HashMap<u8, u8>>,
 }
 
 impl SupportedDevice {
