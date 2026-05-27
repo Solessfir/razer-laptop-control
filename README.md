@@ -82,6 +82,23 @@ is also code to run in `openrc`, but it is currently unmaintained.
 We currently support installing the application via installation script and via
 NixOS Flake. The flake has no known maintainers but we try to keep it working.
 
+### Installing via prebuilt binary
+
+> [!WARNING]
+> Tested on Arch Linux only.
+
+Using `curl`:
+
+```sh
+curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s install
+```
+
+Using `wget`:
+
+```sh
+wget -qO- https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s install
+```
+
 ### Installing via script
 
 Before installing, the following dependencies are needed:
@@ -113,6 +130,110 @@ imports = [
 ```
 services.razer-laptop-control.enable = true;
 ```
+
+### Uninstalling
+
+> [!WARNING]
+> Tested on Arch Linux only. Removes binaries, services, udev rules,
+> desktop entry and icon installed by the binary installer.
+
+Using `curl`:
+
+```sh
+curl -sSL https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s uninstall
+```
+
+Using `wget`:
+
+```sh
+wget -qO- https://raw.githubusercontent.com/Solessfir/razer-laptop-control/main/install-bin.sh | bash -s uninstall
+```
+
+## CLI Usage
+
+Top-level subcommands:
+
+| Subcommand                          | Purpose                                  |
+| ----------------------------------- | ---------------------------------------- |
+| `read <attr> <ac\|bat>`             | Read current value of an attribute       |
+| `write <attr> <ac\|bat> <args>`     | Change and persist an attribute          |
+| `standard-effect <effect> <args>`   | Apply firmware-side keyboard effect      |
+| `effect <effect> <args>`            | Apply daemon-side animated effect        |
+| `device-info`                       | List detected Razer devices              |
+
+### Attributes (for `read` / `write`)
+
+| Attribute       | Args                       | Description                                              |
+| --------------- | -------------------------- | -------------------------------------------------------- |
+| `fan`           | `<rpm>`                    | `0` = Auto, other = manual RPM                           |
+| `power`         | `<mode> [cpu] [gpu]`       | See Power Modes below                                    |
+| `brightness`    | `<0–100>`                  | Keyboard brightness percent                              |
+| `logo`          | `<0\|1\|2>`                | 0=Off, 1=On, 2=Breathing                                 |
+| `sync`          | `on\|off`                  | Sync AC and battery light profiles                       |
+| `bho`           | `on\|off [threshold]`      | Battery Health Optimization, optional charge cap %       |
+| `light-control` | `on\|off`                  | Enable/disable daemon lighting control                   |
+
+> [!NOTE]
+> Brightness changed via `Fn` keys is not saved by the daemon. Use
+> `razer-cli write brightness` or the GUI to set a persistent value.
+
+### Power Modes
+
+| ID | Mode     | Notes                                          |
+| -- | -------- | ---------------------------------------------- |
+| 0  | Balanced |                                                |
+| 1  | Gaming   |                                                |
+| 2  | Creator  |                                                |
+| 3  | Silent   |                                                |
+| 4  | Custom   | Requires `<cpu_boost> <gpu_boost>` args        |
+
+Boost levels (Power Mode 4 only):
+
+| Level | CPU                                  | GPU    |
+| ----- | ------------------------------------ | ------ |
+| 0     | Low                                  | Low    |
+| 1     | Normal                               | Normal |
+| 2     | High                                 | High   |
+| 3     | Boost (models with `boost` feature)  | -      |
+
+### Keyboard Effects
+
+Standard effects (firmware-side). Invoke as
+`razer-cli standard-effect <name> <args>`:
+
+| Effect      | Args                                                   | Notes                              |
+| ----------- | ------------------------------------------------------ | ---------------------------------- |
+| `off`       | -                                                      | No lighting                        |
+| `wave`      | `<direction>`                                          | 0 or 1                             |
+| `spectrum`  | -                                                      | Color cycle                        |
+| `static`    | `<r> <g> <b>`                                          | Solid color                        |
+| `reactive`  | `<speed> <r> <g> <b>`                                  | Speed 0–255                        |
+| `breathing` | `<kind> <r1> <g1> <b1> <r2> <g2> <b2>`                 | Kind: 0=single, 1=dual, 2=random   |
+| `starlight` | `<kind> <speed> <r1> <g1> <b1> <r2> <g2> <b2>`         | Kind same as `breathing`           |
+
+Custom per-key effects (animated, daemon-side). Invoke as
+`razer-cli effect <name> <args>`:
+
+| Effect              | Args                                   |
+| ------------------- | -------------------------------------- |
+| `static`            | `<r> <g> <b>`                          |
+| `static-gradient`   | `<r1> <g1> <b1> <r2> <g2> <b2>`        |
+| `wave-gradient`     | `<r1> <g1> <b1> <r2> <g2> <b2>`        |
+| `breathing-single`  | `<r> <g> <b> <duration>`               |
+
+### Basic Examples
+
+| Goal                                 | Command                                       |
+| ------------------------------------ | --------------------------------------------- |
+| Balanced power on AC                 | `razer-cli write power ac 0`                  |
+| Gaming power on AC                   | `razer-cli write power ac 1`                  |
+| Silent power on AC                   | `razer-cli write power ac 3`                  |
+| Custom power (CPU=2, GPU=2) on AC    | `razer-cli write power ac 4 2 2`              |
+| Solid red keyboard (firmware)        | `razer-cli standard-effect static 255 0 0`    |
+| Animated red (daemon)                | `razer-cli effect static 255 0 0`             |
+| Read current fan, AC                 | `razer-cli read fan ac`                       |
+| Enable BHO at 80%                    | `razer-cli write bho on 80`                   |
+| List detected devices                | `razer-cli device-info`                       |
 
 ## Troubleshooting
 
