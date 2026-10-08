@@ -264,7 +264,7 @@
         "name": "Razer Blade 18 2024",
         "vid": "1532",
         "pid": "02b8",
-        "features": ["logo", "boost", "bho"],
+        "features": ["logo", "boost", "bho", "synapse_power"],
         "fan": [2200, 4500],
         "power_modes": { "3": 5 }
     }

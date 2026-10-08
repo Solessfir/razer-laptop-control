@@ -707,9 +707,14 @@ impl RazerLaptop {
         0
     }
 
+    // Newer models (verified on Blade 18 2024 via Synapse USB capture) expect 0x01 here and four power zones.
+    fn power_arg0(&mut self) -> u8 {
+        if self.have_feature("synapse_power".to_string()) { 0x01 } else { 0x00 }
+    }
+
     fn set_power(&mut self, zone: u8) -> bool {
         let mut report: RazerPacket = RazerPacket::new(0x0d, 0x02, 0x04);
-        report.args[0] = 0x00;
+        report.args[0] = self.power_arg0();
         report.args[1] = zone;
         report.args[2] = self.power_mode_to_device(self.power);
         match self.fan_rpm {
@@ -739,7 +744,7 @@ impl RazerLaptop {
         if boost == 3 && !self.have_feature("boost".to_string()) {
             boost = 2;
         }
-        report.args[0] = 0x00;
+        report.args[0] = self.power_arg0();
         report.args[1] = 0x01;
         report.args[2] = boost;
         if self.device.send_report(report).is_some() {
@@ -762,7 +767,7 @@ impl RazerLaptop {
 
     fn set_gpu_boost(&mut self, boost: u8) -> bool {
         let mut report: RazerPacket = RazerPacket::new(0x0d, 0x07, 0x03);
-        report.args[0] = 0x00;
+        report.args[0] = self.power_arg0();
         report.args[1] = 0x02;
         report.args[2] = boost;
         if self.device.send_report(report).is_some() {
@@ -772,7 +777,22 @@ impl RazerLaptop {
     }
 
     pub fn set_power_mode(&mut self, mode: u8, cpu_boost: u8, gpu_boost: u8) -> bool {
-        if mode <= 3 {
+        if self.have_feature("synapse_power".to_string()) {
+            if mode > 4 {
+                return true;
+            }
+            self.power = mode;
+            if mode == 4 {
+                self.fan_rpm = 0;
+            }
+            for zone in 0x01..=0x04 {
+                self.set_power(zone);
+            }
+            if mode == 4 {
+                self.set_cpu_boost(cpu_boost);
+                self.set_gpu_boost(gpu_boost);
+            }
+        } else if mode <= 3 {
             self.power = mode;
             self.set_power(0x01);
             self.set_power(0x02);
