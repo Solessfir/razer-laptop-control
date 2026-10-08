@@ -815,7 +815,7 @@ impl RazerLaptop {
     fn set_rpm(&mut self, zone: u8) -> bool {
         let mut report:RazerPacket = RazerPacket::new(0x0d, 0x01, 0x03);
         // Set fan RPM
-        report.args[0] = 0x00;
+        report.args[0] = self.power_arg0();
         report.args[1] = zone;
         report.args[2] = self.fan_rpm;
         if self.device.send_report(report).is_some() {
@@ -830,6 +830,17 @@ impl RazerLaptop {
             match value == 0 {
                 true => self.fan_rpm = value as u8,
                 false => self.fan_rpm = self.clamp_fan(value),
+            }
+            if self.have_feature("synapse_power".to_string()) {
+                for zone in 0x01..=0x04 {
+                    self.set_power(zone);
+                }
+                if value != 0 {
+                    for zone in 0x01..=0x04 {
+                        self.set_rpm(zone);
+                    }
+                }
+                return true;
             }
             self.get_power_mode(0x01);
             self.set_power(0x01);
