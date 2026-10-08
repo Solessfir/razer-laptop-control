@@ -17,10 +17,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: rui314/setup-mold@v1
-    - uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages:  libdbus-1-dev libusb-dev libhidapi-dev libhidapi-hidraw0 pkg-config libudev-dev libgtk-3-dev 
-        version: 1.0
+    - name: "Install system dependencies"
+      run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev libusb-dev libhidapi-dev libhidapi-hidraw0 pkg-config libudev-dev libgtk-3-dev
     - name: "Install Rust"
       uses: dtolnay/rust-toolchain@stable
     - name: "Cache cargo"
@@ -37,10 +35,8 @@ jobs:
     needs: build
     steps:
     - uses: actions/checkout@v4
-    - uses: awalsh128/cache-apt-pkgs-action@latest
-      with:
-        packages:  libdbus-1-dev libusb-dev libhidapi-dev libhidapi-hidraw0 pkg-config libudev-dev libgtk-3-dev 
-        version: 1.0
+    - name: "Install system dependencies"
+      run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev libusb-dev libhidapi-dev libhidapi-hidraw0 pkg-config libudev-dev libgtk-3-dev
     - name: "Install"
       # According to this, sudo sould run ok: https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#administrative-privileges
       run: ./install.sh install
