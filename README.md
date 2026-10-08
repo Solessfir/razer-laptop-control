@@ -17,6 +17,7 @@ incomplete or vary between devices.
 - Power profiles
 - Fan control
 - Logo control
+- HyperShift (Fn layer) key forwarding on supported models
 - Basic GUI
 - CLI
 
@@ -234,6 +235,28 @@ Custom per-key effects (animated, daemon-side). Invoke as
 | Read current fan, AC                 | `razer-cli read fan ac`                       |
 | Enable BHO at 80%                    | `razer-cli write bho on 80`                   |
 | List detected devices                | `razer-cli device-info`                       |
+
+## HyperShift (Fn Layer)
+
+On models with the `hypershift` feature (currently the Blade 18 2024), the daemon forwards the Fn key as F24 through a virtual keyboard named "Razer HyperShift". The firmware reports Fn only through a vendor HID report that the kernel ignores, so nothing else sees it. Fn+F-row shortcuts are handled by the firmware and keep working.
+
+Bind the layer in your compositor or key remapper. Avoid R, T, B and P: the firmware uses them for its own Fn shortcuts. A Hyprland (Lua config) example:
+
+```lua
+-- F24 is XKB keycode 202. A release bind is skipped once another key is pressed while Fn is held, so follow the raw key state.
+hl.on("input.keyboard.key", function(keycode, _, state)
+    if keycode == 202 then
+        hl.dispatch(hl.dsp.submap(state == 1 and "hypershift" or "reset"))
+    end
+end)
+
+hl.define_submap("hypershift", function()
+    hl.bind("w", hl.dsp.send_shortcut({ mods = "", key = "Prior" }), { repeating = true })
+    hl.bind("s", hl.dsp.send_shortcut({ mods = "", key = "Next" }), { repeating = true })
+    -- Numpad keys must use their Num Lock off names plus MOD2 (Num Lock), e.g. KP_End for numpad 1.
+    hl.bind("1", hl.dsp.send_shortcut({ mods = "MOD2", key = "KP_End" }), { repeating = true })
+end)
+```
 
 ## Troubleshooting
 

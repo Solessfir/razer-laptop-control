@@ -16,6 +16,7 @@ mod config;
 mod kbd;
 mod device;
 mod dbus_generated;
+mod hypershift;
 
 use kbd::{Effect, EffectManager};
 use device::DeviceManager;

@@ -489,8 +489,12 @@ impl DeviceManager {
                     let result = self.find_supported_device(device.vendor_id, device.product_id);
                     if let Some(supported_device) = result {
 
+                        let product_id = device.product_id;
                         match device.open() {
                             Ok(device) => {
+                                if supported_device.features.iter().any(|f| f == "hypershift") {
+                                    crate::hypershift::start(product_id);
+                                }
                                 self.device = Some(RazerLaptop::new(
                                     supported_device.name.clone(),
                                     supported_device.features.clone(),

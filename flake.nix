@@ -63,7 +63,7 @@
 
           '';
 
-          cargoHash = "sha256-F8sfQULz3hA+sCXc/hePaQzUilgf5OMe1oPS1UBb57s=";
+          cargoHash = "sha256-gGU0j4+2sm0P82s+U3N04uAP7cCZipThgKBbdFC13LQ=";
         };
       }
     )

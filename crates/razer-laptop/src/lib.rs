@@ -47,3 +47,14 @@ pub fn razer_devices() -> HidResult<Vec<Device>> {
 
     Ok(devices.collect())
 }
+
+/// Gets the hidraw path of one USB interface of a Razer device.
+pub fn interface_path(product_id: u16, interface: i32) -> HidResult<Option<CString>> {
+    let hid_api = HidApi::new()?;
+
+    let path = hid_api.device_list()
+        .find(|d| d.vendor_id() == RAZER_VENDOR_ID && d.product_id() == product_id && d.interface_number() == interface)
+        .map(|d| d.path().into());
+
+    Ok(path)
+}
